@@ -2,14 +2,31 @@
 
 > نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، مع إصدار مرئي مطابق للمصحف. الإصدار المرئي هو المرجع، والنص أدناه إصدار مصاحب للتصفح والبحث وليس بديلًا عن المصحف المرئي.
 
+## Site editions
+
+- Visual mushaf edition (reference): https://abofahad506.github.io/-quran-uthmani-text/
+- Text edition, indexed by surah and ayah: https://abofahad506.github.io/-quran-uthmani-text/quran.html
+- Full surah index: https://abofahad506.github.io/-quran-uthmani-text/llms-full.txt
+- Search index: https://abofahad506.github.io/-quran-uthmani-text/quran-search.json
+- Text checksums: https://abofahad506.github.io/-quran-uthmani-text/checksums.json
+- Per-surah JSON pattern: `https://abofahad506.github.io/-quran-uthmani-text/data/surah/NNN.json`; per-surah TXT pattern: `https://abofahad506.github.io/-quran-uthmani-text/data/surah/NNN.txt` (NNN is zero-padded, 001–114). Examples: [001.json](https://abofahad506.github.io/-quran-uthmani-text/data/surah/001.json), [001.txt](https://abofahad506.github.io/-quran-uthmani-text/data/surah/001.txt), [114.json](https://abofahad506.github.io/-quran-uthmani-text/data/surah/114.json), [114.txt](https://abofahad506.github.io/-quran-uthmani-text/data/surah/114.txt).
+- Agents should prefer the per-surah files: `quran.json` is about 3.8 MB and may be truncated by fetchers.
+- Complete text JSON: https://abofahad506.github.io/-quran-uthmani-text/quran.json
+- Plain text: https://abofahad506.github.io/-quran-uthmani-text/quran.txt
+- Search and navigation sitemap: https://abofahad506.github.io/-quran-uthmani-text/sitemap.xml
+
 ## إصدارات الموقع
 
-- المصحف المرئي: https://abofahad506.github.io/-quran-uthmani-text/
+- المصحف المرئي (المرجع): https://abofahad506.github.io/-quran-uthmani-text/
 - النص المفهرس حسب السور والآيات: https://abofahad506.github.io/-quran-uthmani-text/quran.html
-- البيانات المنظمة بصيغة JSON: https://abofahad506.github.io/-quran-uthmani-text/quran.json
-- النص الكامل بصيغة UTF-8: https://abofahad506.github.io/-quran-uthmani-text/quran.txt
-- فهرس الآيات للبحث: https://abofahad506.github.io/-quran-uthmani-text/quran-search.json
-- خريطة الموقع: https://abofahad506.github.io/-quran-uthmani-text/sitemap.xml
+- الفهرس الكامل للسور: https://abofahad506.github.io/-quran-uthmani-text/llms-full.txt
+- فهرس البحث: https://abofahad506.github.io/-quran-uthmani-text/quran-search.json
+- بصمات النصوص للتحقق: https://abofahad506.github.io/-quran-uthmani-text/checksums.json
+- نمط ملفات JSON لكل سورة: `https://abofahad506.github.io/-quran-uthmani-text/data/surah/NNN.json`؛ ونمط TXT: `https://abofahad506.github.io/-quran-uthmani-text/data/surah/NNN.txt` (يُكتب NNN بثلاث خانات من 001 إلى 114). أمثلة: [001.json](https://abofahad506.github.io/-quran-uthmani-text/data/surah/001.json)، [001.txt](https://abofahad506.github.io/-quran-uthmani-text/data/surah/001.txt)، [114.json](https://abofahad506.github.io/-quran-uthmani-text/data/surah/114.json)، [114.txt](https://abofahad506.github.io/-quran-uthmani-text/data/surah/114.txt).
+- يُفضّل للأنظمة استخدام ملفات السور المنفصلة؛ حجم `quran.json` نحو 3.8 ميغابايت وقد تُقتطع الاستجابة عند جلبه.
+- JSON الكامل: https://abofahad506.github.io/-quran-uthmani-text/quran.json
+- النص الكامل: https://abofahad506.github.io/-quran-uthmani-text/quran.txt
+- خريطة الموقع للتنقل: https://abofahad506.github.io/-quran-uthmani-text/sitemap.xml
 
 ## بيانات المصدر
 
