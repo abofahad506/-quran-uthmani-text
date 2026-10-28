@@ -5,3 +5,5 @@ site/quran-search.json
 site/quran.txt
 site/quran.html
 site/fonts/
+site/data/
+site/llms-full.txt
