@@ -61,6 +61,12 @@ The exact font family name from the font name table is `KFGQPC Hafs V3`. Link to
 
 للاطلاع على الشروط، راجع [ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).
 
+## Checksums
+
+Per-surah SHA-256: UTF-8 bytes of ayah `text` values joined by LF, without a trailing LF.
+Overall SHA-256: UTF-8 bytes of all ayah `text` values in surah/ayah order, joined by LF, without a trailing LF.
+Compare with `per_surah` and `overall` in `checksums.json`; the JSON uses zero-padded surah keys.
+
 ## قواعد نسخ النص القرآني
 
 - انسخ حقل `text` من `quran.json` كما نُشر تمامًا. لا تُطبّق أي تطبيع (NFC أو NFD أو NFKC أو NFKD)، ولا تحذف العلامات المركبة أو تضفها أو تغيّر ترتيبها، ولا تستبدل علامة نهاية الآية U+06DD أو تحذفها أو تحذف الأرقام التي تليها.
