@@ -9,6 +9,7 @@ W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 SRC = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "src/Mushaf-Hafs-Uthmanic.docx")
 OUT = pathlib.Path("site")
 KFGQPC_DATA = pathlib.Path(__file__).parent.parent.joinpath("src", "kfgqpc_hafs_v30.json")
+SITE_URL = "https://abofahad506.github.io/-quran-uthmani-text"
 
 root = ET.fromstring(zipfile.ZipFile(SRC).read("word/document.xml"))
 body = root.find(W + "body")
@@ -286,7 +287,13 @@ quran_html = [
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
     '<meta name="description" content="القرآن الكريم برواية حفص بالرسم العثماني، مقسم حسب السور والآيات مع روابط ثابتة.">',
-    '<title>القرآن الكريم — نص عثماني وروابط الآيات</title>',
+    '<meta name="robots" content="index,follow">',
+    f'<link rel="canonical" href="{SITE_URL}/quran.html">',
+    '<meta property="og:type" content="article">',
+    '<meta property="og:title" content="القرآن الكريم — النص العثماني مفهرس حسب السور والآيات">',
+    '<meta property="og:description" content="اقرأ القرآن الكريم بالرسم العثماني، وابحث في الآيات، وانتقل إلى صفحات المصحف المطابق.">',
+    f'<meta property="og:url" content="{SITE_URL}/quran.html">',
+    '<title>القرآن الكريم بالرسم العثماني — النص الكامل وفهرس السور والآيات</title>',
     '<style>',
     'body{max-width:52rem;margin:2rem auto;padding:0 1rem;color:#222;font-family:serif;line-height:1.9}',
     'h1,h2{line-height:1.4}h2{margin-top:2rem;padding-top:1rem;border-top:1px solid #ccc}',
@@ -302,7 +309,7 @@ quran_html = [
     '<header>',
     '<h1>القرآن الكريم — رواية حفص بالرسم العثماني</h1>',
     f'<p>{escape(attribution)}</p>',
-    '<p><a href="index.html">عرض صفحات المصحف</a> · '
+    '<p><a href="index.html">عرض صفحات المصحف بالرسم العثماني</a> · '
     '<a href="quran.json">تنزيل JSON</a> · <a href="quran.txt">تنزيل النص</a></p>',
     '<section class="tools" aria-label="البحث والنسخ">',
     '<form id="search-form" role="search">',
@@ -471,6 +478,42 @@ quran_html.extend([
     '',
 ])
 (OUT / "quran.html").write_text("\n".join(quran_html), encoding="utf-8")
+
+site_pages = [f"{SITE_URL}/", f"{SITE_URL}/quran.html"]
+sitemap_urls = "\n".join(
+    f"  <url><loc>{url}</loc></url>" for url in site_pages
+)
+(OUT / "sitemap.xml").write_text(
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    f"{sitemap_urls}\n"
+    "</urlset>\n",
+    encoding="utf-8",
+)
+(OUT / "robots.txt").write_text(
+    "User-agent: *\n"
+    "Allow: /\n"
+    f"Sitemap: {SITE_URL}/sitemap.xml\n",
+    encoding="utf-8",
+)
+(OUT / "llms.txt").write_text(
+    "# القرآن الكريم — رواية حفص بالرسم العثماني\n\n"
+    "> نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، "
+    "مع إصدار مرئي مطابق للمصحف.\n\n"
+    "## إصدارات الموقع\n\n"
+    f"- المصحف المرئي: {SITE_URL}/\n"
+    f"- النص المفهرس حسب السور والآيات: {SITE_URL}/quran.html\n"
+    f"- البيانات المنظمة بصيغة JSON: {SITE_URL}/quran.json\n"
+    f"- النص الكامل بصيغة UTF-8: {SITE_URL}/quran.txt\n"
+    f"- فهرس الآيات للبحث: {SITE_URL}/quran-search.json\n"
+    f"- خريطة الموقع: {SITE_URL}/sitemap.xml\n\n"
+    "## بيانات المصدر\n\n"
+    "- الإصدار: حفص، الرسم العثماني، مجمع الملك فهد، الإصدار 3.0.\n"
+    "- JSON ينظم النص بحسب السور والآيات، ويضم مراجع الصفحات والأجزاء وروابط الآيات.\n"
+    "- حقوق النص وشروط استخدامه تعود إلى مجمع الملك فهد؛ راجع NOTICE.md في المستودع. "
+    "يرجى التحقق من المصحف الرسمي عند الاستخدامات الحرجة.\n",
+    encoding="utf-8",
+)
 
 print(
     f"{len(pages)} pages, {sum(len(p) for p in pages)} paragraphs, "
