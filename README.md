@@ -1,6 +1,6 @@
 # -quran-uthmani-text
 
-The Complete Holy Quran text in Uthmani script, sourced from the King Fahd Complex for the Printing of the Holy Quran.
+The visual mushaf edition is the reference edition. The linked text edition is a companion for browsing and search, using King Fahd Complex (KFGQPC) Hafs v3.0 text data.
 
 [Open the Mushaf viewer](https://abofahad506.github.io/-quran-uthmani-text/) ·
 [Browse linked surahs and ayahs](https://abofahad506.github.io/-quran-uthmani-text/quran.html) ·
@@ -8,10 +8,16 @@ The Complete Holy Quran text in Uthmani script, sourced from the King Fahd Compl
 [Download search index](https://abofahad506.github.io/-quran-uthmani-text/quran-search.json) ·
 [Download plain text](https://abofahad506.github.io/-quran-uthmani-text/quran.txt)
 
-## Machine-readable text
+## Companion text edition
 
-The Pages build generates UTF-8 `quran.json`, `quran-search.json`, and `quran.txt`
-from the KFGQPC Hafs v3.0 data and the source DOCX. The structured JSON organizes
+The visual edition at the [Mushaf viewer](https://abofahad506.github.io/-quran-uthmani-text/)
+is authoritative for reference. The linked text edition and its UTF-8 `quran.json`,
+`quran-search.json`, and `quran.txt` files are companion resources for browsing,
+search, and programmatic use; they do not replace the visual mushaf. The text is
+from the KFGQPC Hafs v3.0 dataset (`src/kfgqpc_hafs_v30.json`), while printed-page
+layout comes from `src/Mushaf-Hafs-Uthmanic.docx`.
+
+The Pages build validates all 6,236 generated JSON, HTML, and plain-text ayahs against the matching KFGQPC Unicode source records; it also validates the search index against the source emlaey records and checks printed-page references against the visual DOCX layout. Any mismatch fails the build before it can be published. The structured JSON organizes
 ayahs by surah and includes the Uthmani text, the original emlaey search text,
 juz, printed page and line references, and stable URLs. The Unicode ayah text is
 preserved as supplied by KFGQPC without normalization. Search uses the separate,
@@ -36,6 +42,8 @@ Example JSON shape:
   "attribution": "King Fahd Glorious Quran Printing Complex (KFGQPC), Madinah, Saudi Arabia",
   "edition": "Hafs narration, Uthmani script, KFGQPC version 3.0",
   "source": "src/Mushaf-Hafs-Uthmanic.docx",
+  "text_source": "src/kfgqpc_hafs_v30.json",
+  "text_status": "Companion text edition; the visual mushaf edition is the reference.",
   "search_source": "KFGQPC Hafs v3.0 data, aya_text_emlaey field",
   "surahs": [
     {

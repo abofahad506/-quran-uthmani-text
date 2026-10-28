@@ -3,7 +3,7 @@
 one <div> per printed line. Text is copied verbatim; nothing is rewritten."""
 import re, sys, zipfile, hashlib, json, pathlib
 from xml.etree import ElementTree as ET
-from html import escape
+from html import escape, unescape
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 SRC = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "src/Mushaf-Hafs-Uthmanic.docx")
@@ -226,8 +226,10 @@ for surah in surahs:
 
 attribution = (
     "Quranic text: King Fahd Glorious Quran Printing Complex (KFGQPC), "
-    "Madinah, Saudi Arabia; Hafs narration. Uthmani text and emlaey search text "
-    "from src/kfgqpc_hafs_v30.json; page layout from src/Mushaf-Hafs-Uthmanic.docx. "
+    "Madinah, Saudi Arabia; Hafs narration, Uthmani script, KFGQPC v3.0. "
+    "Text and emlaey search data from src/kfgqpc_hafs_v30.json; visual page layout "
+    "from src/Mushaf-Hafs-Uthmanic.docx. The visual mushaf edition is the reference; "
+    "the linked text edition is a companion for browsing and search. "
     "Rights and terms belong to KFGQPC; "
     "see NOTICE.md. Verify against the official printed mushaf for critical use."
 )
@@ -235,6 +237,8 @@ quran = {
     "attribution": attribution,
     "edition": "Hafs narration, Uthmani script, KFGQPC version 3.0",
     "source": "src/Mushaf-Hafs-Uthmanic.docx",
+    "text_source": "src/kfgqpc_hafs_v30.json",
+    "text_status": "Companion text edition; the visual mushaf edition is the reference.",
     "search_source": "KFGQPC Hafs v3.0 data, aya_text_emlaey field",
     "surahs": surahs,
 }
@@ -265,7 +269,9 @@ search_index = {
 )
 
 plain_text = [
-    "# Quranic text — Hafs narration, Uthmani script",
+    "# Companion Quranic text — Hafs narration, Uthmani script, KFGQPC v3.0",
+    "# Reference edition: the visual mushaf at https://abofahad506.github.io/-quran-uthmani-text/",
+    "# Text source: src/kfgqpc_hafs_v30.json; page layout source: src/Mushaf-Hafs-Uthmanic.docx",
     f"# {attribution}",
     "# Each ayah line: surah number:ayah number [printed page(s)] <source text>",
     "",
@@ -286,18 +292,19 @@ quran_html = [
     '<head>',
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<meta name="description" content="القرآن الكريم برواية حفص بالرسم العثماني، مقسم حسب السور والآيات مع روابط ثابتة.">',
+    '<meta name="description" content="النص المصاحب للقرآن الكريم برواية حفص والرسم العثماني وفق بيانات مجمع الملك فهد، مفهرس للسور والآيات؛ إصدار المصحف المرئي هو المرجع.">',
     '<meta name="robots" content="index,follow">',
     f'<link rel="canonical" href="{SITE_URL}/quran.html">',
     '<meta property="og:type" content="article">',
-    '<meta property="og:title" content="القرآن الكريم — النص العثماني مفهرس حسب السور والآيات">',
-    '<meta property="og:description" content="اقرأ القرآن الكريم بالرسم العثماني، وابحث في الآيات، وانتقل إلى صفحات المصحف المطابق.">',
+    '<meta property="og:title" content="النص المصاحب للقرآن الكريم — حفص، KFGQPC v3.0">',
+    '<meta property="og:description" content="نص مفهرس للتصفح والبحث وفق بيانات مجمع الملك فهد؛ إصدار المصحف المرئي هو المرجع.">',
     f'<meta property="og:url" content="{SITE_URL}/quran.html">',
-    '<title>القرآن الكريم بالرسم العثماني — النص الكامل وفهرس السور والآيات</title>',
+    '<title>النص المصاحب للقرآن الكريم — حفص، الرسم العثماني، KFGQPC v3.0</title>',
     '<style>',
     'body{max-width:52rem;margin:2rem auto;padding:0 1rem;color:#222;font-family:serif;line-height:1.9}',
     'h1,h2{line-height:1.4}h2{margin-top:2rem;padding-top:1rem;border-top:1px solid #ccc}',
     'a{color:#245b35}.ayah{font-size:1.25rem}.reference{font:1rem sans-serif;white-space:nowrap}',
+    '.edition-note{padding:.75rem 1rem;background:#f2f4ef;border-inline-start:4px solid #52802B}',
     '.page-link{font:0.8rem sans-serif;white-space:nowrap}',
     '.tools{padding:1rem;background:#f2f4ef;border:1px solid #ccd4c8;border-radius:.5rem}',
     '.tools form{margin:.5rem 0}.tools input{max-width:100%;padding:.4rem}',
@@ -307,7 +314,8 @@ quran_html = [
     '</head>',
     '<body>',
     '<header>',
-    '<h1>القرآن الكريم — رواية حفص بالرسم العثماني</h1>',
+    '<h1>النص المصاحب للقرآن الكريم — رواية حفص بالرسم العثماني</h1>',
+    '<p class="edition-note" role="note">هذه نسخة نصية مصاحبة للتصفح والبحث، مصدرها بيانات مجمع الملك فهد (حفص، الإصدار 3.0). إصدار المصحف المرئي هو المرجع؛ <a href="index.html">افتح صفحات المصحف</a>.</p>',
     f'<p>{escape(attribution)}</p>',
     '<p><a href="index.html">عرض صفحات المصحف بالرسم العثماني</a> · '
     '<a href="quran.json">تنزيل JSON</a> · <a href="quran.txt">تنزيل النص</a></p>',
@@ -479,6 +487,57 @@ quran_html.extend([
 ])
 (OUT / "quran.html").write_text("\n".join(quran_html), encoding="utf-8")
 
+generated_quran = json.loads((OUT / "quran.json").read_text(encoding="utf-8"))
+generated_ayahs = [
+    (surah["number"], ayah["number"], ayah["text"], ayah["search_text"])
+    for surah in generated_quran["surahs"]
+    for ayah in surah["ayahs"]
+]
+source_ayahs = [
+    (
+        record["sura_no"],
+        record["aya_no"],
+        record["aya_text_unicode"],
+        record["aya_text_emlaey"],
+    )
+    for record in records
+]
+if generated_ayahs != source_ayahs:
+    for generated, source in zip(generated_ayahs, source_ayahs):
+        if generated != source:
+            raise ValueError(
+                f"Generated JSON text mismatch against KFGQPC source "
+                f"for {source[0]}:{source[1]}"
+            )
+    raise ValueError("Generated JSON has a different ayah count from KFGQPC source")
+
+generated_text_rows = re.findall(
+    r"^(\d+):(\d+) \[\d+(?:,\d+)*\] (.+)$",
+    (OUT / "quran.txt").read_text(encoding="utf-8"),
+    re.MULTILINE,
+)
+if generated_text_rows != [
+    (str(sura), str(aya), text) for sura, aya, text, _ in source_ayahs
+]:
+    raise ValueError("Generated plain text does not match the KFGQPC Unicode source")
+
+generated_html_ayahs = [
+    unescape(text)
+    for text in re.findall(
+        r'<span class="ayah">(.*?)</span>',
+        (OUT / "quran.html").read_text(encoding="utf-8"),
+    )
+]
+if generated_html_ayahs != [text for _, _, text, _ in source_ayahs]:
+    raise ValueError("Generated HTML text does not match the KFGQPC Unicode source")
+
+generated_search = json.loads((OUT / "quran-search.json").read_text(encoding="utf-8"))
+if [
+    (int(ayah["reference"].split(":")[0]), int(ayah["reference"].split(":")[1]), ayah["text"])
+    for ayah in generated_search["ayahs"]
+] != [(sura, aya, text) for sura, aya, _, text in source_ayahs]:
+    raise ValueError("Generated search index does not match the KFGQPC emlaey source")
+
 site_pages = [f"{SITE_URL}/", f"{SITE_URL}/quran.html"]
 sitemap_urls = "\n".join(
     f"  <url><loc>{url}</loc></url>" for url in site_pages
@@ -499,7 +558,8 @@ sitemap_urls = "\n".join(
 (OUT / "llms.txt").write_text(
     "# القرآن الكريم — رواية حفص بالرسم العثماني\n\n"
     "> نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، "
-    "مع إصدار مرئي مطابق للمصحف.\n\n"
+    "مع إصدار مرئي مطابق للمصحف. الإصدار المرئي هو المرجع، والنص أدناه إصدار مصاحب "
+    "للتصفح والبحث وليس بديلًا عن المصحف المرئي.\n\n"
     "## إصدارات الموقع\n\n"
     f"- المصحف المرئي: {SITE_URL}/\n"
     f"- النص المفهرس حسب السور والآيات: {SITE_URL}/quran.html\n"
@@ -508,7 +568,8 @@ sitemap_urls = "\n".join(
     f"- فهرس الآيات للبحث: {SITE_URL}/quran-search.json\n"
     f"- خريطة الموقع: {SITE_URL}/sitemap.xml\n\n"
     "## بيانات المصدر\n\n"
-    "- الإصدار: حفص، الرسم العثماني، مجمع الملك فهد، الإصدار 3.0.\n"
+    "- إصدار النص: حفص، الرسم العثماني، مجمع الملك فهد، الإصدار 3.0؛ مصدر النص هو بيانات KFGQPC.\n"
+    "- الإصدار المرئي هو المرجع، ويُستخدم النص المفهرس كإصدار مصاحب للتصفح والبحث.\n"
     "- JSON ينظم النص بحسب السور والآيات، ويضم مراجع الصفحات والأجزاء وروابط الآيات.\n"
     "- حقوق النص وشروط استخدامه تعود إلى مجمع الملك فهد؛ راجع NOTICE.md في المستودع. "
     "يرجى التحقق من المصحف الرسمي عند الاستخدامات الحرجة.\n",
