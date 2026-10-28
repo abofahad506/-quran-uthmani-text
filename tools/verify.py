@@ -16,6 +16,8 @@ SOURCE_PATH = ROOT / "src" / "kfgqpc_hafs_v30.json"
 ALLOWLIST_PATH = ROOT / "tools" / "allowed_codepoints.json"
 FONT_PATH = ROOT / "fonts" / "KFGQPC-Hafs-V30.ttf"
 SITE = ROOT / "site"
+SITE_FONT_PATH = SITE / "fonts" / "KFGQPC-Hafs-V30.ttf"
+EXPECTED_FONT_SHA256 = "c9dd7e71a454565b13d89e5e6f2663a918acb0a20a23eea31eccb32a3aeec47a"
 URL_RE = re.compile(r"https?://[^\s<>\"'`]+", re.IGNORECASE)
 URL_DOCUMENTS = (
     ROOT / "site" / "llms.txt",
@@ -96,6 +98,38 @@ def verify_rows(label, actual_rows, source_by_reference, allowlist, cmap):
 
 def source_ordered_records(records):
     return sorted(records, key=lambda record: (record["sura_no"], record["aya_no"]))
+
+
+def checksums_for_records(records):
+    per_surah = {}
+    all_text = []
+    for surah_number in range(1, 115):
+        texts = [
+            record["aya_text_unicode"]
+            for record in records
+            if record["sura_no"] == surah_number
+        ]
+        if not texts:
+            fail(f"KFGQPC source is missing surah {surah_number}")
+        per_surah[f"{surah_number:03}"] = hashlib.sha256(
+            "\n".join(texts).encode("utf-8")
+        ).hexdigest()
+        all_text.extend(texts)
+    return {
+        "algorithm": "SHA-256",
+        "per_surah": per_surah,
+        "overall": hashlib.sha256("\n".join(all_text).encode("utf-8")).hexdigest(),
+    }
+
+
+def verify_font_hashes():
+    for font_path in (FONT_PATH, SITE_FONT_PATH):
+        digest = hashlib.sha256(font_path.read_bytes()).hexdigest()
+        if digest != EXPECTED_FONT_SHA256:
+            fail(
+                f"{font_path.relative_to(ROOT)} SHA-256 mismatch: "
+                f"found {digest}, expected {EXPECTED_FONT_SHA256}"
+            )
 
 
 def expand_target(base, path_parts):
@@ -211,6 +245,7 @@ def main():
             f"{ALLOWLIST_PATH.relative_to(ROOT)}: {format_codepoints(new_source_points)}"
         )
 
+    verify_font_hashes()
     font = TTFont(FONT_PATH, lazy=True)
     try:
         cmap = set(font.getBestCmap() or {})
@@ -233,7 +268,6 @@ def main():
             f"{len(surah_json_paths)} JSON and {len(surah_text_paths)} TXT"
         )
 
-    verified_surah_texts = {}
     for surah_number in range(1, 115):
         stem = f"{surah_number:03}"
         json_path = SITE / "data" / "surah" / f"{stem}.json"
@@ -295,10 +329,6 @@ def main():
             allowlist,
             cmap,
         )
-        verified_surah_texts[surah_number] = [
-            record["aya_text_unicode"] for record in expected_records
-        ]
-
     quran_text = (SITE / "quran.txt").read_text(encoding="utf-8")
     plain_text_rows = []
     for line in quran_text.splitlines():
@@ -332,26 +362,12 @@ def main():
         cmap,
     )
 
-    surah_hashes = {
-        f"{surah_number:03}": hashlib.sha256(
-            "\n".join(texts).encode("utf-8")
-        ).hexdigest()
-        for surah_number, texts in verified_surah_texts.items()
-    }
-    overall_text = "\n".join(
-        text
-        for surah_number in range(1, 115)
-        for text in verified_surah_texts[surah_number]
+    expected_checksums = checksums_for_records(ordered_records)
+    actual_checksums = json.loads(
+        (SITE / "checksums.json").read_text(encoding="utf-8")
     )
-    checksums = {
-        "algorithm": "SHA-256",
-        "per_surah": surah_hashes,
-        "overall": hashlib.sha256(overall_text.encode("utf-8")).hexdigest(),
-    }
-    (SITE / "checksums.json").write_text(
-        json.dumps(checksums, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    if actual_checksums != expected_checksums:
+        fail("site/checksums.json differs from SHA-256 checksums recomputed from KFGQPC source")
     verify_document_urls()
     print(
         "Integrity verification passed: "
