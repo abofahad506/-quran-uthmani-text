@@ -1,0 +1,18 @@
+# القرآن الكريم — رواية حفص بالرسم العثماني
+
+> نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، مع إصدار مرئي مطابق للمصحف.
+
+## إصدارات الموقع
+
+- المصحف المرئي: https://abofahad506.github.io/-quran-uthmani-text/
+- النص المفهرس حسب السور والآيات: https://abofahad506.github.io/-quran-uthmani-text/quran.html
+- البيانات المنظمة بصيغة JSON: https://abofahad506.github.io/-quran-uthmani-text/quran.json
+- النص الكامل بصيغة UTF-8: https://abofahad506.github.io/-quran-uthmani-text/quran.txt
+- فهرس الآيات للبحث: https://abofahad506.github.io/-quran-uthmani-text/quran-search.json
+- خريطة الموقع: https://abofahad506.github.io/-quran-uthmani-text/sitemap.xml
+
+## بيانات المصدر
+
+- الإصدار: حفص، الرسم العثماني، مجمع الملك فهد، الإصدار 3.0.
+- JSON ينظم النص بحسب السور والآيات، ويضم مراجع الصفحات والأجزاء وروابط الآيات.
+- حقوق النص وشروط استخدامه تعود إلى مجمع الملك فهد؛ راجع NOTICE.md في المستودع. يرجى التحقق من المصحف الرسمي عند الاستخدامات الحرجة.
