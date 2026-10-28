@@ -19,8 +19,10 @@ The linked text edition provides stable fragments for each surah and ayah. For
 example, [Al-Baqarah](https://abofahad506.github.io/-quran-uthmani-text/quran.html#s2)
 and [ayah 255](https://abofahad506.github.io/-quran-uthmani-text/quran.html#s2-a255)
 can be linked directly. Each ayah is displayed with its `surah:ayah` reference
-before the source text, so copying a passage retains its citation. The same
-relative URLs are included in the JSON `url` fields.
+before the source text, so copying a passage retains its citation. The page also
+supports Arabic text search (matching ignores diacritics) and copying one ayah
+or a continuous ayah range with citations. The same relative URLs are included
+in the JSON `url` fields.
 
 Example JSON shape:
 
