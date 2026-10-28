@@ -3,6 +3,7 @@
 The Complete Holy Quran text in Uthmani script, sourced from the King Fahd Complex for the Printing of the Holy Quran.
 
 [Open the Mushaf viewer](https://abofahad506.github.io/-quran-uthmani-text/) ·
+[Browse linked surahs and ayahs](https://abofahad506.github.io/-quran-uthmani-text/quran.html) ·
 [Download JSON](https://abofahad506.github.io/-quran-uthmani-text/quran.json) ·
 [Download plain text](https://abofahad506.github.io/-quran-uthmani-text/quran.txt)
 
@@ -13,6 +14,13 @@ The JSON organizes the text by surah and ayah; `pages` lists every printed page
 containing that ayah. Ayah text retains its source Unicode characters, diacritics,
 ayah marker, and printed number. Visual line breaks are joined with spaces; no
 Unicode normalization is applied.
+
+The linked text edition provides stable fragments for each surah and ayah. For
+example, [Al-Baqarah](https://abofahad506.github.io/-quran-uthmani-text/quran.html#s2)
+and [ayah 255](https://abofahad506.github.io/-quran-uthmani-text/quran.html#s2-a255)
+can be linked directly. Each ayah is displayed with its `surah:ayah` reference
+before the source text, so copying a passage retains its citation. The same
+relative URLs are included in the JSON `url` fields.
 
 Example JSON shape:
 
