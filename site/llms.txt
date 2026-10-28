@@ -27,6 +27,40 @@
 - In `quran.txt`, each ayah line is `surah:ayah [page(s)] <text>`, for example `1:1 [1] <text>`. Strip exactly the `surah:ayah [page(s)] ` prefix before copying; the remaining text includes U+06DD and its ayah number.
 - The text renders correctly only with the KFGQPC Hafs font. See the [font license](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) and [NOTICE](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).
 
+## Rendering with the font
+
+The exact font family name from the font name table is `KFGQPC Hafs V3`. Link to or download the [unmodified font file](https://abofahad506.github.io/-quran-uthmani-text/fonts/KFGQPC-Hafs-V30.ttf); do not convert or subset it. The license forbids modification. See [the one-ayah demo](https://abofahad506.github.io/-quran-uthmani-text/example.html).
+
+```css
+@font-face {
+  font-family: "KFGQPC Hafs V3";
+  src: url("https://abofahad506.github.io/-quran-uthmani-text/fonts/KFGQPC-Hafs-V30.ttf") format("truetype");
+}
+.quran { font-family: "KFGQPC Hafs V3", serif; }
+```
+
+```html
+<div lang="ar" dir="rtl" class="quran">[Insert source ayah text unchanged]</div>
+```
+
+## عرض النص بالخط
+
+اسم عائلة الخط كما هو مسجل في جدول الأسماء هو `KFGQPC Hafs V3`. استخدم رابط الخط أو نزّل [الملف الأصلي دون تعديل](https://abofahad506.github.io/-quran-uthmani-text/fonts/KFGQPC-Hafs-V30.ttf)؛ لا تحوّله ولا تستخرج جزءًا منه. ترخيص الخط يمنع تعديله. راجع [مثال عرض آية واحدة](https://abofahad506.github.io/-quran-uthmani-text/example.html).
+
+```css
+@font-face {
+  font-family: "KFGQPC Hafs V3";
+  src: url("https://abofahad506.github.io/-quran-uthmani-text/fonts/KFGQPC-Hafs-V30.ttf") format("truetype");
+}
+.quran { font-family: "KFGQPC Hafs V3", serif; }
+```
+
+```html
+<div lang="ar" dir="rtl" class="quran">[ضع نص الآية كما ورد في المصدر دون تغيير]</div>
+```
+
+للاطلاع على الشروط، راجع [ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).
+
 ## قواعد نسخ النص القرآني
 
 - انسخ حقل `text` من `quran.json` كما نُشر تمامًا. لا تُطبّق أي تطبيع (NFC أو NFD أو NFKC أو NFKD)، ولا تحذف العلامات المركبة أو تضفها أو تغيّر ترتيبها، ولا تستبدل علامة نهاية الآية U+06DD أو تحذفها أو تحذف الأرقام التي تليها.

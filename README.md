@@ -79,6 +79,26 @@ covered by this repository's MIT license. See [`NOTICE.md`](NOTICE.md).
 Verify against the official printed mushaf for critical use.
 [Open the Quran Pages website](https://abofahad506.github.io/-quran-uthmani-text/)
 
+## Rendering with the font
+
+The embedded font family name is `KFGQPC Hafs V3`. Link to or download the original,
+unmodified font file; do not convert or subset it. Its license forbids modification.
+See [`fonts/LICENSE-KFGQPC.txt`](fonts/LICENSE-KFGQPC.txt) and [`NOTICE.md`](NOTICE.md).
+The [one-ayah demo](https://abofahad506.github.io/-quran-uthmani-text/example.html)
+uses the KFGQPC font from its absolute URL.
+
+```css
+@font-face {
+  font-family: "KFGQPC Hafs V3";
+  src: url("https://abofahad506.github.io/-quran-uthmani-text/fonts/KFGQPC-Hafs-V30.ttf") format("truetype");
+}
+.quran { font-family: "KFGQPC Hafs V3", serif; }
+```
+
+```html
+<div class="quran" lang="ar" dir="rtl">[Insert source ayah text unchanged]</div>
+```
+
 ---
 
 ## 📜 Disclaimer & Attribution

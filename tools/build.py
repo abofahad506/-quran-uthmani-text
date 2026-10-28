@@ -581,6 +581,41 @@ generated_html_ayahs = [
 if generated_html_ayahs != [text for _, _, text, _ in source_ayahs]:
     raise ValueError("Generated HTML text does not match the KFGQPC Unicode source")
 
+font_family = "KFGQPC Hafs V3"
+font_url = f"{SITE_URL}/fonts/KFGQPC-Hafs-V30.ttf"
+example_ayah = surahs[0]["ayahs"][0]
+example_html = "\n".join([
+    "<!doctype html>",
+    '<html lang="ar" dir="rtl">',
+    "<head>",
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    "<title>KFGQPC Hafs font example — Al-Fatihah 1:1</title>",
+    "<style>",
+    "@font-face {",
+    f'  font-family: "{font_family}";',
+    f'  src: url("{font_url}") format("truetype");',
+    "}",
+    "body { margin: 2rem; }",
+    f'.ayah {{ font-family: "{font_family}", serif; font-size: 2rem; line-height: 2; }}',
+    "</style>",
+    "</head>",
+    "<body>",
+    "<main>",
+    "<h1>Al-Fatihah 1:1</h1>",
+    f'<p class="ayah" lang="ar" dir="rtl">{escape(example_ayah["text"])}</p>',
+    "</main>",
+    "</body>",
+    "</html>",
+    "",
+])
+(OUT / "example.html").write_text(example_html, encoding="utf-8")
+if [
+    unescape(text)
+    for text in re.findall(r'<p class="ayah" lang="ar" dir="rtl">(.*?)</p>', example_html)
+] != [example_ayah["text"]]:
+    raise ValueError("Font example ayah does not match the KFGQPC source")
+
 generated_search = json.loads((OUT / "quran-search.json").read_text(encoding="utf-8"))
 if [
     (int(ayah["reference"].split(":")[0]), int(ayah["reference"].split(":")[1]), ayah["text"])
@@ -635,6 +670,7 @@ llms_full_lines.extend([
 site_pages = [
     f"{SITE_URL}/",
     f"{SITE_URL}/quran.html",
+    f"{SITE_URL}/example.html",
     f"{SITE_URL}/llms-full.txt",
     f"{SITE_URL}/data/surah/001.json",
     f"{SITE_URL}/data/surah/001.txt",
@@ -695,6 +731,39 @@ allah_example = "".join(
     "- The text renders correctly only with the KFGQPC Hafs font. See the "
     "[font license](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
     "and [NOTICE](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
+    "## Rendering with the font\n\n"
+    f'The exact font family name from the font name table is `{font_family}`. '
+    f'Link to or download the [unmodified font file]({font_url}); do not convert or subset it. '
+    "The license forbids modification. See [the one-ayah demo]("
+    f"{SITE_URL}/example.html).\n\n"
+    "```css\n"
+    "@font-face {\n"
+    f'  font-family: "{font_family}";\n'
+    f'  src: url("{font_url}") format("truetype");\n'
+    "}\n"
+    f'.quran {{ font-family: "{font_family}", serif; }}\n'
+    "```\n\n"
+    "```html\n"
+    '<div lang="ar" dir="rtl" class="quran">[Insert source ayah text unchanged]</div>\n'
+    "```\n\n"
+    "## عرض النص بالخط\n\n"
+    f'اسم عائلة الخط كما هو مسجل في جدول الأسماء هو `{font_family}`. '
+    f'استخدم رابط الخط أو نزّل [الملف الأصلي دون تعديل]({font_url})؛ لا تحوّله ولا تستخرج جزءًا منه. '
+    "ترخيص الخط يمنع تعديله. راجع [مثال عرض آية واحدة]("
+    f"{SITE_URL}/example.html).\n\n"
+    "```css\n"
+    "@font-face {\n"
+    f'  font-family: "{font_family}";\n'
+    f'  src: url("{font_url}") format("truetype");\n'
+    "}\n"
+    f'.quran {{ font-family: "{font_family}", serif; }}\n'
+    "```\n\n"
+    "```html\n"
+    '<div lang="ar" dir="rtl" class="quran">[ضع نص الآية كما ورد في المصدر دون تغيير]</div>\n'
+    "```\n\n"
+    "للاطلاع على الشروط، راجع "
+    "[ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
+    "و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
     "## قواعد نسخ النص القرآني\n\n"
     "- انسخ حقل `text` من `quran.json` كما نُشر تمامًا. لا تُطبّق أي تطبيع "
     "(NFC أو NFD أو NFKC أو NFKD)، ولا تحذف العلامات المركبة أو تضفها أو تغيّر ترتيبها، "
