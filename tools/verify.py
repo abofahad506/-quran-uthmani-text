@@ -6,6 +6,7 @@ import re
 import sys
 from html import unescape
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 from fontTools.ttLib import TTFont
 
@@ -14,6 +15,13 @@ SOURCE_PATH = ROOT / "src" / "kfgqpc_hafs_v30.json"
 ALLOWLIST_PATH = ROOT / "tools" / "allowed_codepoints.json"
 FONT_PATH = ROOT / "fonts" / "KFGQPC-Hafs-V30.ttf"
 SITE = ROOT / "site"
+URL_RE = re.compile(r"https?://[^\s<>\"'`]+", re.IGNORECASE)
+URL_DOCUMENTS = (
+    ROOT / "site" / "llms.txt",
+    ROOT / "README.md",
+    ROOT / "NOTICE.md",
+    ROOT / "site" / "llms-full.txt",
+)
 
 
 def fail(message):
@@ -89,7 +97,67 @@ def source_ordered_records(records):
     return sorted(records, key=lambda record: (record["sura_no"], record["aya_no"]))
 
 
+def url_target(url):
+    parsed = urlsplit(url)
+    hostname = (parsed.hostname or "").lower()
+    path_parts = [unquote(part) for part in parsed.path.split("/") if part]
+    if hostname == "github.com":
+        if len(path_parts) < 2 or path_parts[:2] != [
+            "abofahad506",
+            "-quran-uthmani-text",
+        ]:
+            return None
+        remaining = path_parts[2:]
+        if not remaining:
+            return ROOT
+        if len(remaining) >= 3 and remaining[0] in ("blob", "tree", "raw"):
+            remaining = remaining[2:]
+        else:
+            return None
+        return ROOT.joinpath(*remaining)
+    if hostname == "abofahad506.github.io":
+        if not path_parts or path_parts[0] != "-quran-uthmani-text":
+            return None
+        remaining = path_parts[1:] or ["index.html"]
+        return SITE.joinpath(*remaining), ROOT.joinpath(*remaining)
+    return False
+
+
+def verify_document_urls():
+    legacy = "github.com/abofah506"
+    for document in URL_DOCUMENTS:
+        if not document.is_file():
+            fail(f"URL check document is missing: {document.relative_to(ROOT)}")
+        for match in URL_RE.finditer(document.read_text(encoding="utf-8")):
+            url = match.group().rstrip(".,;:!?)]}،؛")
+            if legacy in url.lower():
+                fail(
+                    f"{document.relative_to(ROOT)} contains a legacy GitHub URL: {url}"
+                )
+            target = url_target(url)
+            if target is False:
+                continue
+            if target is None:
+                fail(
+                    f"{document.relative_to(ROOT)} contains a GitHub URL outside "
+                    f"this repository: {url}"
+                )
+            targets = target if isinstance(target, tuple) else (target,)
+            for candidate in targets:
+                try:
+                    candidate.resolve().relative_to(ROOT.resolve())
+                except ValueError:
+                    fail(f"URL escapes the repository path: {url}")
+            if not any(candidate.exists() for candidate in targets):
+                fail(
+                    f"{document.relative_to(ROOT)} URL points to a missing path: "
+                    f"{url} -> "
+                    + " or ".join(str(candidate.relative_to(ROOT)) for candidate in targets)
+                )
+
+
 def main():
+    verify_document_urls()
     records = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
     if not isinstance(records, list) or not records:
         fail("KFGQPC source must be a non-empty JSON array")
