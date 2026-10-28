@@ -2,6 +2,8 @@
 
 The Complete Holy Quran text in Uthmani script, sourced from the King Fahd Complex for the Printing of the Holy Quran.
 
+[Open the Quran Pages website](https://abofahad506.github.io/-quran-uthmani-text/)
+
 ---
 
 ## 📜 Disclaimer & Attribution
