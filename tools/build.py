@@ -286,6 +286,24 @@ for surah in surahs:
     plain_text.append("")
 (OUT / "quran.txt").write_text("\n".join(plain_text), encoding="utf-8")
 
+checksum_surahs = {
+    f'{surah["number"]:03}': hashlib.sha256(
+        "\n".join(ayah["text"] for ayah in surah["ayahs"]).encode("utf-8")
+    ).hexdigest()
+    for surah in surahs
+}
+checksum_text = "\n".join(
+    ayah["text"] for surah in surahs for ayah in surah["ayahs"]
+)
+(OUT / "checksums.json").write_text(
+    json.dumps({
+        "algorithm": "SHA-256",
+        "per_surah": checksum_surahs,
+        "overall": hashlib.sha256(checksum_text.encode("utf-8")).hexdigest(),
+    }, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8",
+)
+
 surah_data_dir = OUT / "data" / "surah"
 surah_data_dir.mkdir(parents=True, exist_ok=True)
 surah_file_sizes = []
