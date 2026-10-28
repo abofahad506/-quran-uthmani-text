@@ -286,6 +286,56 @@ for surah in surahs:
     plain_text.append("")
 (OUT / "quran.txt").write_text("\n".join(plain_text), encoding="utf-8")
 
+surah_data_dir = OUT / "data" / "surah"
+surah_data_dir.mkdir(parents=True, exist_ok=True)
+surah_file_sizes = []
+for surah in surahs:
+    number = surah["number"]
+    stem = f"{number:03}"
+    surah_json_path = surah_data_dir / f"{stem}.json"
+    surah_text_path = surah_data_dir / f"{stem}.txt"
+    surah_json = {
+        "attribution": attribution,
+        "edition": quran["edition"],
+        "surah_number": number,
+        "name": surah["name"],
+        "ayah_count": len(surah["ayahs"]),
+        "ayahs": surah["ayahs"],
+    }
+    surah_json_path.write_text(
+        json.dumps(surah_json, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    surah_text = "\n".join(
+        f'{number}:{ayah["number"]} [{",".join(map(str, ayah["pages"]))}] {ayah["text"]}'
+        for ayah in surah["ayahs"]
+    )
+    surah_text_path.write_text(surah_text + "\n", encoding="utf-8")
+
+    generated_surah = json.loads(surah_json_path.read_text(encoding="utf-8"))
+    if generated_surah != surah_json:
+        raise ValueError(f"Generated surah JSON mismatch for surah {number}")
+    expected_source_ayahs = [
+        (record["aya_no"], record["aya_text_unicode"], record["aya_text_emlaey"])
+        for record in records
+        if record["sura_no"] == number
+    ]
+    if [
+        (ayah["number"], ayah["text"], ayah["search_text"])
+        for ayah in generated_surah["ayahs"]
+    ] != expected_source_ayahs:
+        raise ValueError(f"Generated surah JSON text mismatch against source for surah {number}")
+    expected_text_lines = [
+        f'{number}:{record["aya_no"]} [{record["page"]}] {record["aya_text_unicode"]}'
+        for record in records
+        if record["sura_no"] == number
+    ]
+    if surah_text_path.read_text(encoding="utf-8").splitlines() != expected_text_lines:
+        raise ValueError(f"Generated surah text mismatch against source for surah {number}")
+    surah_file_sizes.append(
+        (surah, surah_json_path.stat().st_size, surah_text_path.stat().st_size)
+    )
+
 quran_html = [
     '<!doctype html>',
     '<html lang="ar" dir="rtl">',
@@ -538,7 +588,60 @@ if [
 ] != [(sura, aya, text) for sura, aya, _, text in source_ayahs]:
     raise ValueError("Generated search index does not match the KFGQPC emlaey source")
 
-site_pages = [f"{SITE_URL}/", f"{SITE_URL}/quran.html"]
+llms_full_lines = [
+    "# Full surah index — Quranic text companion",
+    "",
+    "> The visual mushaf edition is the reference. These per-surah files are companion resources.",
+    "",
+    "## English index",
+    "",
+    "| Surah | Ayahs | JSON size (bytes) | TXT size (bytes) | Files |",
+    "|---|---:|---:|---:|---|",
+]
+for surah, json_size, text_size in surah_file_sizes:
+    number = surah["number"]
+    stem = f"{number:03}"
+    base = f"{SITE_URL}/data/surah/{stem}"
+    llms_full_lines.append(
+        f'| Surah {number} ({surah["name"]}) | {len(surah["ayahs"])} | {json_size} | '
+        f'{text_size} | [JSON]({base}.json) · [TXT]({base}.txt) |'
+    )
+llms_full_lines.extend([
+    "",
+    "Ayah URL pattern: `quran.html#s{surah}-a{ayah}`; for example, "
+    f"[2:255]({SITE_URL}/quran.html#s2-a255). Surah URL pattern: `quran.html#s{{surah}}`.",
+    "",
+    "## الفهرس العربي",
+    "",
+    "| السورة | عدد الآيات | حجم JSON (بايت) | حجم TXT (بايت) | الملفات |",
+    "|---|---:|---:|---:|---|",
+])
+for surah, json_size, text_size in surah_file_sizes:
+    number = surah["number"]
+    stem = f"{number:03}"
+    base = f"{SITE_URL}/data/surah/{stem}"
+    llms_full_lines.append(
+        f'| سورة {number} ({surah["name"]}) | {len(surah["ayahs"])} | {json_size} | '
+        f'{text_size} | [JSON]({base}.json) · [TXT]({base}.txt) |'
+    )
+llms_full_lines.extend([
+    "",
+    "نمط رابط الآية: `quran.html#s{surah}-a{ayah}`؛ مثال: "
+    f"[البقرة ٢٥٥]({SITE_URL}/quran.html#s2-a255). ونمط رابط السورة: `quran.html#s{{surah}}`.",
+    "",
+])
+(OUT / "llms-full.txt").write_text("\n".join(llms_full_lines), encoding="utf-8")
+
+site_pages = [
+    f"{SITE_URL}/",
+    f"{SITE_URL}/quran.html",
+    f"{SITE_URL}/llms-full.txt",
+    f"{SITE_URL}/data/surah/001.json",
+    f"{SITE_URL}/data/surah/001.txt",
+    f"{SITE_URL}/data/surah/002.json",
+    f"{SITE_URL}/data/surah/114.json",
+    f"{SITE_URL}/data/surah/114.txt",
+]
 sitemap_urls = "\n".join(
     f"  <url><loc>{url}</loc></url>" for url in site_pages
 )
@@ -614,3 +717,11 @@ print(
     f"{len(pages)} pages, {sum(len(p) for p in pages)} paragraphs, "
     f"{len(surahs)} surahs, {sum(len(s['ayahs']) for s in surahs)} ayahs"
 )
+largest_files = sorted(
+    (path for path in OUT.rglob("*") if path.is_file()),
+    key=lambda path: path.stat().st_size,
+    reverse=True,
+)[:5]
+print("5 largest generated files:")
+for path in largest_files:
+    print(f"  {path.relative_to(OUT)}: {path.stat().st_size:,} bytes")
