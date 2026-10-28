@@ -191,6 +191,10 @@ quran = {
     "source": "src/Mushaf-Hafs-Uthmanic.docx",
     "surahs": surahs,
 }
+for surah in surahs:
+    surah["url"] = f"quran.html#s{surah['number']}"
+    for ayah in surah["ayahs"]:
+        ayah["url"] = f"quran.html#s{surah['number']}-a{ayah['number']}"
 (OUT / "quran.json").write_text(
     json.dumps(quran, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
 )
@@ -210,6 +214,57 @@ for surah in surahs:
         )
     plain_text.append("")
 (OUT / "quran.txt").write_text("\n".join(plain_text), encoding="utf-8")
+
+quran_html = [
+    '<!doctype html>',
+    '<html lang="ar" dir="rtl">',
+    '<head>',
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    '<meta name="description" content="القرآن الكريم برواية حفص بالرسم العثماني، مقسم حسب السور والآيات مع روابط ثابتة.">',
+    '<title>القرآن الكريم — نص عثماني وروابط الآيات</title>',
+    '<style>',
+    'body{max-width:52rem;margin:2rem auto;padding:0 1rem;color:#222;font-family:serif;line-height:1.9}',
+    'h1,h2{line-height:1.4}h2{margin-top:2rem;padding-top:1rem;border-top:1px solid #ccc}',
+    'a{color:#245b35}.ayah{font-size:1.25rem}.reference{font:1rem sans-serif;white-space:nowrap}',
+    '.page-link{font:0.8rem sans-serif;white-space:nowrap}',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<header>',
+    '<h1>القرآن الكريم — رواية حفص بالرسم العثماني</h1>',
+    f'<p>{escape(attribution)}</p>',
+    '<p><a href="index.html">عرض صفحات المصحف</a> · '
+    '<a href="quran.json">تنزيل JSON</a> · <a href="quran.txt">تنزيل النص</a></p>',
+    '<nav aria-label="فهرس السور"><h2>فهرس السور</h2><ol>',
+]
+for surah in surahs:
+    quran_html.append(
+        f'<li><a href="#s{surah["number"]}">{escape(surah["name"])}</a></li>'
+    )
+quran_html.extend(['</ol></nav>', '</header>', '<main>'])
+for surah in surahs:
+    quran_html.append(
+        f'<section aria-labelledby="s{surah["number"]}">'
+        f'<h2 id="s{surah["number"]}"><a href="#s{surah["number"]}">'
+        f'{escape(surah["name"])}</a></h2>'
+    )
+    for ayah in surah["ayahs"]:
+        page_links = ", ".join(
+            f'<a class="page-link" href="index.html#p{page_number}">{page_number}</a>'
+            for page_number in ayah["pages"]
+        )
+        reference = f'{surah["number"]}:{ayah["number"]}'
+        quran_html.append(
+            f'<p id="s{surah["number"]}-a{ayah["number"]}">'
+            f'<a class="reference" href="#s{surah["number"]}-a{ayah["number"]}">'
+            f'{reference}</a> '
+            f'<span class="ayah">{escape(ayah["text"])}</span> '
+            f'<span class="page-link">[صفحة {page_links}]</span></p>'
+        )
+    quran_html.append('</section>')
+quran_html.extend(['</main>', '</body>', '</html>', ''])
+(OUT / "quran.html").write_text("\n".join(quran_html), encoding="utf-8")
 
 print(
     f"{len(pages)} pages, {sum(len(p) for p in pages)} paragraphs, "
