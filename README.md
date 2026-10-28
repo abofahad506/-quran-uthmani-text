@@ -42,6 +42,7 @@ The plain-text file uses one ayah per line in the format
 **King Fahd Glorious Quran Printing Complex**; its rights and terms are not
 covered by this repository's MIT license. See [`NOTICE.md`](NOTICE.md).
 Verify against the official printed mushaf for critical use.
+[Open the Quran Pages website](https://abofahad506.github.io/-quran-uthmani-text/)
 
 ---
 
