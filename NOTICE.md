@@ -6,7 +6,7 @@ Official source: https://fonts.qurancomplex.gov.sa/
 
 | Item | Files | Terms |
 |---|---|---|
-| Quranic text (Hafs, Uthmani script) | `src/Mushaf-Hafs-Uthmanic.docx`, generated `site/index.html`, `site/quran.html`, `site/quran.json`, `site/quran.txt` | KFGQPC's terms. The Quranic Unicode characters are preserved without normalization; visual line breaks are joined with spaces in the structured ayah text. |
+| Quranic text (Hafs, Uthmani script and emlaey spelling) | `src/Mushaf-Hafs-Uthmanic.docx`, `src/kfgqpc_hafs_v30.json`, generated `site/index.html`, `site/quran.html`, `site/quran.json`, `site/quran-search.json`, `site/quran.txt` | KFGQPC's terms. The Unicode ayah text and emlaey search text are taken from the KFGQPC Hafs v3.0 data. The printed-page layout is generated from the source DOCX. |
 | Font "KFGQPC HAFS Uthmanic Script" | `fonts/KFGQPC-Hafs-V30.ttf` | KFGQPC End-User License Agreement (see below) |
 | Surah banner image | `site/assets/surah-banner.png` | Extracted unchanged from the KFGQPC docx |
 

@@ -5,15 +5,17 @@ The Complete Holy Quran text in Uthmani script, sourced from the King Fahd Compl
 [Open the Mushaf viewer](https://abofahad506.github.io/-quran-uthmani-text/) ·
 [Browse linked surahs and ayahs](https://abofahad506.github.io/-quran-uthmani-text/quran.html) ·
 [Download JSON](https://abofahad506.github.io/-quran-uthmani-text/quran.json) ·
+[Download search index](https://abofahad506.github.io/-quran-uthmani-text/quran-search.json) ·
 [Download plain text](https://abofahad506.github.io/-quran-uthmani-text/quran.txt)
 
 ## Machine-readable text
 
-The Pages build generates UTF-8 `quran.json` and `quran.txt` from the source DOCX.
-The JSON organizes the text by surah and ayah; `pages` lists every printed page
-containing that ayah. Ayah text retains its source Unicode characters, diacritics,
-ayah marker, and printed number. Visual line breaks are joined with spaces; no
-Unicode normalization is applied.
+The Pages build generates UTF-8 `quran.json`, `quran-search.json`, and `quran.txt`
+from the KFGQPC Hafs v3.0 data and the source DOCX. The structured JSON organizes
+ayahs by surah and includes the Uthmani text, the original emlaey search text,
+juz, printed page and line references, and stable URLs. The Unicode ayah text is
+preserved as supplied by KFGQPC without normalization. Search uses the separate,
+compact `quran-search.json` index and loads it only when a search is submitted.
 
 The linked text edition provides stable fragments for each surah and ayah. For
 example, [Al-Baqarah](https://abofahad506.github.io/-quran-uthmani-text/quran.html#s2)
@@ -21,8 +23,11 @@ and [ayah 255](https://abofahad506.github.io/-quran-uthmani-text/quran.html#s2-a
 can be linked directly. Each ayah is displayed with its `surah:ayah` reference
 before the source text, so copying a passage retains its citation. The page also
 supports Arabic text search (matching ignores diacritics) and copying one ayah
-or a continuous ayah range with citations. The same relative URLs are included
-in the JSON `url` fields.
+or a continuous ayah range with citations. Search uses the KFGQPC
+`aya_text_emlaey` field alongside the displayed Uthmani text, so common modern
+spellings can find their Uthmani-rendered ayahs. Search normalization is applied
+only to matching, never to the source text shown or copied. The same relative
+URLs are included in the JSON `url` fields.
 
 Example JSON shape:
 
@@ -31,6 +36,7 @@ Example JSON shape:
   "attribution": "King Fahd Glorious Quran Printing Complex (KFGQPC), Madinah, Saudi Arabia",
   "edition": "Hafs narration, Uthmani script, KFGQPC version 3.0",
   "source": "src/Mushaf-Hafs-Uthmanic.docx",
+  "search_source": "KFGQPC Hafs v3.0 data, aya_text_emlaey field",
   "surahs": [
     {
       "number": 1,
@@ -39,7 +45,11 @@ Example JSON shape:
         {
           "number": 1,
           "pages": [1],
-          "text": "<verbatim source ayah, including its ayah marker and printed number>"
+          "lines": [2, 2],
+          "juz": 1,
+          "text": "<KFGQPC Uthmani ayah text>",
+          "search_text": "<KFGQPC emlaey spelling>",
+          "url": "quran.html#s1-a1"
         }
       ]
     }
