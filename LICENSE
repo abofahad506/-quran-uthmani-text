@@ -2,12 +2,24 @@ MIT License
 
 Copyright (c) 2026 abofahad506
 
+SCOPE: This license applies ONLY to the original source code and files written
+by the copyright holder, namely:
+  - tools/build.py
+  - tools/template.html
+  - site/style.css
+  - .github/workflows/pages.yml
+  - README.md
+
+It does NOT apply to the Quranic text, the KFGQPC font, the surah banner image,
+or the source document (src/*.docx). Those belong to the King Fahd Glorious
+Quran Printing Complex (KFGQPC) and are governed by their own terms. See NOTICE.md.
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of the files listed above (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
