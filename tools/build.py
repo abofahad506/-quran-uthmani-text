@@ -672,12 +672,12 @@ site_pages = [
     f"{SITE_URL}/quran.html",
     f"{SITE_URL}/example.html",
     f"{SITE_URL}/llms-full.txt",
-    f"{SITE_URL}/data/surah/001.json",
-    f"{SITE_URL}/data/surah/001.txt",
-    f"{SITE_URL}/data/surah/002.json",
-    f"{SITE_URL}/data/surah/114.json",
-    f"{SITE_URL}/data/surah/114.txt",
 ]
+site_pages.extend(
+    f"{SITE_URL}/data/surah/{surah['number']:03}{extension}"
+    for surah in surahs
+    for extension in (".json", ".txt")
+)
 sitemap_urls = "\n".join(
     f"  <url><loc>{url}</loc></url>" for url in site_pages
 )
@@ -703,13 +703,38 @@ allah_example = "".join(
     "> نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، "
     "مع إصدار مرئي مطابق للمصحف. الإصدار المرئي هو المرجع، والنص أدناه إصدار مصاحب "
     "للتصفح والبحث وليس بديلًا عن المصحف المرئي.\n\n"
+    "## Site editions\n\n"
+    f"- Visual mushaf edition (reference): {SITE_URL}/\n"
+    f"- Text edition, indexed by surah and ayah: {SITE_URL}/quran.html\n"
+    f"- Full surah index: {SITE_URL}/llms-full.txt\n"
+    f"- Search index: {SITE_URL}/quran-search.json\n"
+    f"- Text checksums: {SITE_URL}/checksums.json\n"
+    f"- Per-surah JSON pattern: `{SITE_URL}/data/surah/NNN.json`; per-surah TXT pattern: "
+    f"`{SITE_URL}/data/surah/NNN.txt` (NNN is zero-padded, 001–114). "
+    f"Examples: [001.json]({SITE_URL}/data/surah/001.json), "
+    f"[001.txt]({SITE_URL}/data/surah/001.txt), "
+    f"[114.json]({SITE_URL}/data/surah/114.json), "
+    f"[114.txt]({SITE_URL}/data/surah/114.txt).\n"
+    "- Agents should prefer the per-surah files: `quran.json` is about 3.8 MB and may be truncated by fetchers.\n"
+    f"- Complete text JSON: {SITE_URL}/quran.json\n"
+    f"- Plain text: {SITE_URL}/quran.txt\n"
+    f"- Search and navigation sitemap: {SITE_URL}/sitemap.xml\n\n"
     "## إصدارات الموقع\n\n"
-    f"- المصحف المرئي: {SITE_URL}/\n"
+    f"- المصحف المرئي (المرجع): {SITE_URL}/\n"
     f"- النص المفهرس حسب السور والآيات: {SITE_URL}/quran.html\n"
-    f"- البيانات المنظمة بصيغة JSON: {SITE_URL}/quran.json\n"
-    f"- النص الكامل بصيغة UTF-8: {SITE_URL}/quran.txt\n"
-    f"- فهرس الآيات للبحث: {SITE_URL}/quran-search.json\n"
-    f"- خريطة الموقع: {SITE_URL}/sitemap.xml\n\n"
+    f"- الفهرس الكامل للسور: {SITE_URL}/llms-full.txt\n"
+    f"- فهرس البحث: {SITE_URL}/quran-search.json\n"
+    f"- بصمات النصوص للتحقق: {SITE_URL}/checksums.json\n"
+    f"- نمط ملفات JSON لكل سورة: `{SITE_URL}/data/surah/NNN.json`؛ ونمط TXT: "
+    f"`{SITE_URL}/data/surah/NNN.txt` (يُكتب NNN بثلاث خانات من 001 إلى 114). "
+    f"أمثلة: [001.json]({SITE_URL}/data/surah/001.json)، "
+    f"[001.txt]({SITE_URL}/data/surah/001.txt)، "
+    f"[114.json]({SITE_URL}/data/surah/114.json)، "
+    f"[114.txt]({SITE_URL}/data/surah/114.txt).\n"
+    "- يُفضّل للأنظمة استخدام ملفات السور المنفصلة؛ حجم `quran.json` نحو 3.8 ميغابايت وقد تُقتطع الاستجابة عند جلبه.\n"
+    f"- JSON الكامل: {SITE_URL}/quran.json\n"
+    f"- النص الكامل: {SITE_URL}/quran.txt\n"
+    f"- خريطة الموقع للتنقل: {SITE_URL}/sitemap.xml\n\n"
     "## بيانات المصدر\n\n"
     "- إصدار النص: حفص، الرسم العثماني، مجمع الملك فهد، الإصدار 3.0؛ مصدر النص هو بيانات KFGQPC.\n"
     "- الإصدار المرئي هو المرجع، ويُستخدم النص المفهرس كإصدار مصاحب للتصفح والبحث.\n"

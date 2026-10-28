@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Verify generated Quran text against the KFGQPC source and font coverage."""
+import glob
 import hashlib
 import json
 import re
@@ -97,6 +98,17 @@ def source_ordered_records(records):
     return sorted(records, key=lambda record: (record["sura_no"], record["aya_no"]))
 
 
+def expand_target(base, path_parts):
+    pattern_parts = [
+        part.replace("NNN", "[0-9][0-9][0-9]")
+        for part in path_parts
+    ]
+    pattern = base.joinpath(*pattern_parts)
+    if "NNN" not in "/".join(path_parts):
+        return [pattern]
+    return [Path(path) for path in sorted(glob.glob(str(pattern)))]
+
+
 def url_target(url):
     parsed = urlsplit(url)
     hostname = (parsed.hostname or "").lower()
@@ -114,12 +126,15 @@ def url_target(url):
             remaining = remaining[2:]
         else:
             return None
-        return ROOT.joinpath(*remaining)
+        return expand_target(ROOT, remaining)
     if hostname == "abofahad506.github.io":
         if not path_parts or path_parts[0] != "-quran-uthmani-text":
             return None
         remaining = path_parts[1:] or ["index.html"]
-        return SITE.joinpath(*remaining), ROOT.joinpath(*remaining)
+        return [
+            *expand_target(SITE, remaining),
+            *expand_target(ROOT, remaining),
+        ]
     return False
 
 
@@ -142,7 +157,11 @@ def verify_document_urls():
                     f"{document.relative_to(ROOT)} contains a GitHub URL outside "
                     f"this repository: {url}"
                 )
-            targets = target if isinstance(target, tuple) else (target,)
+            targets = target if isinstance(target, list) else [target]
+            if not targets:
+                fail(
+                    f"{document.relative_to(ROOT)} URL pattern has no matching files: {url}"
+                )
             for candidate in targets:
                 try:
                     candidate.resolve().relative_to(ROOT.resolve())
@@ -157,7 +176,6 @@ def verify_document_urls():
 
 
 def main():
-    verify_document_urls()
     records = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
     if not isinstance(records, list) or not records:
         fail("KFGQPC source must be a non-empty JSON array")
@@ -334,6 +352,7 @@ def main():
         json.dumps(checksums, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    verify_document_urls()
     print(
         "Integrity verification passed: "
         f"{len(source_by_reference):,} ayahs, "
