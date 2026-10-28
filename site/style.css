@@ -1,0 +1,32 @@
+/* الأبعاد من الـdocx: A4 (595.45×841.7pt)، هوامش جانبية 36pt، علوي 72pt، سفلي 180pt، خط 22pt */
+@font-face{
+  font-family:"KFGQPC Hafs V3";
+  src:url("fonts/KFGQPC-Hafs-V30.ttf") format("truetype");
+  font-display:block;
+}
+html{background:#d8d8d0}
+body{margin:0}
+.pw{container-type:inline-size;width:min(100%,820px);margin:14px auto}
+.page{--u:calc(100cqw / 595.45);position:relative;aspect-ratio:11909/16834;background:#fffef8;overflow:hidden;
+  box-shadow:0 2px 10px #0004;font-family:"KFGQPC Hafs V3",serif;
+  font-synthesis:none;text-rendering:optimizeLegibility}
+.frame{position:absolute;top:calc(var(--u)*42);bottom:calc(var(--u)*150);
+  left:calc(var(--u)*26);right:calc(var(--u)*26);
+  border:calc(var(--u)*3.75) double #52802B}
+.txt{position:absolute;top:calc(var(--u)*72);left:calc(var(--u)*36);right:calc(var(--u)*36);
+  font-size:calc(var(--u)*22);line-height:normal;color:#000}
+.l{white-space:nowrap}
+.l.j{text-align:justify;text-align-last:justify}
+.l.c{text-align:center}
+.l.sura{text-align:center;position:relative;
+  background:url(assets/surah-banner.png) center/100% 100% no-repeat;
+  margin:0 calc(var(--u)*13);padding:calc(var(--u)*3) 0}
+footer{font-family:"Noto Naskh Arabic",Tahoma,Arial,sans-serif;position:absolute;left:calc(var(--u)*36);right:calc(var(--u)*36);bottom:calc(var(--u)*72);
+  font-size:calc(var(--u)*10);text-align:center;display:flex;flex-direction:column;gap:2px}
+footer span{font-size:.8em;opacity:.8}
+@page{size:A4;margin:0}
+@media print{
+  html{background:#fff}
+  .pw{width:210mm;margin:0;break-after:page}
+  .page{box-shadow:none}
+}
