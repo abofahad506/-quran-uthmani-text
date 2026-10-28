@@ -8,6 +8,7 @@ from html import escape
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 SRC = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "src/Mushaf-Hafs-Uthmanic.docx")
 OUT = pathlib.Path("site")
+KFGQPC_DATA = pathlib.Path(__file__).parent.parent.joinpath("src", "kfgqpc_hafs_v30.json")
 
 root = ET.fromstring(zipfile.ZipFile(SRC).read("word/document.xml"))
 body = root.find(W + "body")
@@ -179,16 +180,61 @@ OUT.mkdir(exist_ok=True)
 (OUT / "page-hashes.json").write_text(json.dumps(hashes), encoding="utf-8")
 
 surahs = extract_quran()
+records = json.loads(KFGQPC_DATA.read_text(encoding="utf-8"))
+if not isinstance(records, list) or len(records) != 6236:
+    raise ValueError("KFGQPC data must contain exactly 6,236 ayah records")
+
+records_by_reference = {}
+for record in records:
+    reference = (record["sura_no"], record["aya_no"])
+    if reference in records_by_reference:
+        raise ValueError(f"Duplicate KFGQPC record for {reference[0]}:{reference[1]}")
+    if not record["aya_text_unicode"] or not record["aya_text_emlaey"]:
+        raise ValueError(f"Missing KFGQPC text for {reference[0]}:{reference[1]}")
+    if not 1 <= record["page"] <= len(pages):
+        raise ValueError(f"Invalid KFGQPC page for {reference[0]}:{reference[1]}")
+    if not 1 <= record["line_start"] <= record["line_end"] <= 15:
+        raise ValueError(f"Invalid KFGQPC line range for {reference[0]}:{reference[1]}")
+    markers = AYAH_MARKER.findall(record["aya_text_unicode"])
+    marker_number = (
+        int(markers[-1].translate(str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")))
+        if markers else None
+    )
+    if marker_number != record["aya_no"]:
+        raise ValueError(f"Invalid KFGQPC ayah marker for {reference[0]}:{reference[1]}")
+    if not 1 <= record["jozz"] <= 30:
+        raise ValueError(f"Invalid KFGQPC juz for {reference[0]}:{reference[1]}")
+    records_by_reference[reference] = record
+
+if len(records_by_reference) != sum(len(surah["ayahs"]) for surah in surahs):
+    raise ValueError("KFGQPC data does not match the extracted surah and ayah count")
+
+for surah in surahs:
+    for ayah in surah["ayahs"]:
+        reference = (surah["number"], ayah["number"])
+        record = records_by_reference.get(reference)
+        if record is None:
+            raise ValueError(f"Missing KFGQPC record for {reference[0]}:{reference[1]}")
+        if ayah["pages"] != [record["page"]]:
+            raise ValueError(f"Page mismatch for KFGQPC record {reference[0]}:{reference[1]}")
+        ayah["text"] = record["aya_text_unicode"]
+        ayah["search_text"] = record["aya_text_emlaey"]
+        ayah["pages"] = [record["page"]]
+        ayah["lines"] = [record["line_start"], record["line_end"]]
+        ayah["juz"] = record["jozz"]
+
 attribution = (
     "Quranic text: King Fahd Glorious Quran Printing Complex (KFGQPC), "
-    "Madinah, Saudi Arabia; Hafs narration. Extracted from "
-    "src/Mushaf-Hafs-Uthmanic.docx. Rights and terms belong to KFGQPC; "
+    "Madinah, Saudi Arabia; Hafs narration. Uthmani text and emlaey search text "
+    "from src/kfgqpc_hafs_v30.json; page layout from src/Mushaf-Hafs-Uthmanic.docx. "
+    "Rights and terms belong to KFGQPC; "
     "see NOTICE.md. Verify against the official printed mushaf for critical use."
 )
 quran = {
     "attribution": attribution,
     "edition": "Hafs narration, Uthmani script, KFGQPC version 3.0",
     "source": "src/Mushaf-Hafs-Uthmanic.docx",
+    "search_source": "KFGQPC Hafs v3.0 data, aya_text_emlaey field",
     "surahs": surahs,
 }
 for surah in surahs:
@@ -197,6 +243,24 @@ for surah in surahs:
         ayah["url"] = f"quran.html#s{surah['number']}-a{ayah['number']}"
 (OUT / "quran.json").write_text(
     json.dumps(quran, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+)
+
+search_index = {
+    "attribution": "King Fahd Glorious Quran Printing Complex (KFGQPC), Hafs v3.0",
+    "field": "aya_text_emlaey",
+    "ayahs": [
+        {
+            "reference": f'{surah["number"]}:{ayah["number"]}',
+            "text": ayah["search_text"],
+            "url": ayah["url"],
+        }
+        for surah in surahs
+        for ayah in surah["ayahs"]
+    ],
+}
+(OUT / "quran-search.json").write_text(
+    json.dumps(search_index, ensure_ascii=False, separators=(",", ":")) + "\n",
+    encoding="utf-8",
 )
 
 plain_text = [
@@ -350,9 +414,27 @@ quran_html.extend([
     '  copyText(ayahRows.slice(first, last + 1).map(citationText).join("\\n"));',
     '});',
     'function searchKey(value) {',
-    '  return value.normalize("NFD").replace(/[\\u064B-\\u065F\\u0670\\u06D6-\\u06EDـ]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي");',
+    '  return value.normalize("NFD").replace(/[\\u064B-\\u065F\\u0670\\u06D6-\\u06ED\\u08F0-\\u08F2ـ]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ءا/g, "ا").replace(/ى/g, "ي");',
     '}',
-    'document.getElementById("search-form").addEventListener("submit", event => {',
+    'let searchIndexPromise;',
+    'function loadSearchIndex() {',
+    '  if (!searchIndexPromise) {',
+    '    searchIndexPromise = fetch("quran-search.json").then(response => {',
+    '      if (!response.ok) throw new Error(`Search index request failed: ${response.status}`);',
+    '      return response.json();',
+    '    }).then(data => {',
+    '      if (data.field !== "aya_text_emlaey" || !Array.isArray(data.ayahs) || data.ayahs.length !== 6236) {',
+    '        throw new Error("Invalid KFGQPC search index");',
+    '      }',
+    '      return data.ayahs.map(ayah => ({...ayah, key: searchKey(ayah.text)}));',
+    '    }).catch(error => {',
+    '      searchIndexPromise = null;',
+    '      throw error;',
+    '    });',
+    '  }',
+    '  return searchIndexPromise;',
+    '}',
+    'document.getElementById("search-form").addEventListener("submit", async event => {',
     '  event.preventDefault();',
     '  const query = searchKey(document.getElementById("search-query").value.trim());',
     '  const results = document.getElementById("search-results");',
@@ -361,19 +443,27 @@ quran_html.extend([
     '    statusMessage.textContent = "اكتب نصًا للبحث.";',
     '    return;',
     '  }',
-    '  const matches = ayahRows.filter(row => searchKey(row.querySelector(".ayah").textContent).includes(query));',
-    '  const shown = matches.slice(0, 100);',
-    '  for (const row of shown) {',
-    '    const item = document.createElement("li");',
-    '    const link = document.createElement("a");',
-    '    link.href = `#${row.id}`;',
-    '    link.textContent = `${row.querySelector(".reference").textContent.trim()} — ${row.querySelector(".ayah").textContent.trim()}`;',
-    '    item.appendChild(link);',
-    '    results.appendChild(item);',
+    '  statusMessage.textContent = "جارٍ البحث في النص الإملائي والعثماني...";',
+    '  try {',
+    '    const index = await loadSearchIndex();',
+    '    const standardMatches = new Set(index.filter(ayah => ayah.key.includes(query)).map(ayah => ayah.url.split("#").pop()));',
+    '    const matches = ayahRows.filter(row => standardMatches.has(row.id) || searchKey(row.querySelector(".ayah").textContent).includes(query));',
+    '    const shown = matches.slice(0, 100);',
+    '    for (const row of shown) {',
+    '      const item = document.createElement("li");',
+    '      const link = document.createElement("a");',
+    '      link.href = `#${row.id}`;',
+    '      link.textContent = `${row.querySelector(".reference").textContent.trim()} — ${row.querySelector(".ayah").textContent.trim()}`;',
+    '      item.appendChild(link);',
+    '      results.appendChild(item);',
+    '    }',
+    '    statusMessage.textContent = matches.length',
+    '      ? `عدد النتائج: ${matches.length}${matches.length > shown.length ? ` (عُرضت أول ${shown.length})` : ""}.`',
+    '      : "لا توجد نتائج مطابقة."; ',
+    '  } catch (error) {',
+    '    console.error("Could not search KFGQPC text:", error);',
+    '    statusMessage.textContent = "تعذر تحميل فهرس البحث. حاول مجددًا لاحقًا.";',
     '  }',
-    '  statusMessage.textContent = matches.length',
-    '    ? `عدد النتائج: ${matches.length}${matches.length > shown.length ? ` (عُرضت أول ${shown.length})` : ""}.`',
-    '    : "لا توجد نتائج مطابقة.";',
     '});',
     '</script>',
     '</body>',
