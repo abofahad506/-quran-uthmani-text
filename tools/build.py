@@ -729,8 +729,8 @@ allah_example = "".join(
     "`1:1 [1] <text>`. Strip exactly the `surah:ayah [page(s)] ` prefix before copying; "
     "the remaining text includes U+06DD and its ayah number.\n"
     "- The text renders correctly only with the KFGQPC Hafs font. See the "
-    "[font license](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
-    "and [NOTICE](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
+    "[font license](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
+    "and [NOTICE](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
     "## Rendering with the font\n\n"
     f'The exact font family name from the font name table is `{font_family}`. '
     f'Link to or download the [unmodified font file]({font_url}); do not convert or subset it. '
@@ -762,8 +762,8 @@ allah_example = "".join(
     '<div lang="ar" dir="rtl" class="quran">[ضع نص الآية كما ورد في المصدر دون تغيير]</div>\n'
     "```\n\n"
     "للاطلاع على الشروط، راجع "
-    "[ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
-    "و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
+    "[ترخيص الخط](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
+    "و[إشعار الحقوق](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
     "## Checksums\n\n"
     "Per-surah SHA-256: UTF-8 bytes of ayah `text` values joined by LF, without a trailing LF.\n"
     "Overall SHA-256: UTF-8 bytes of all ayah `text` values in surah/ayah order, joined by LF, without a trailing LF.\n"
@@ -781,8 +781,8 @@ allah_example = "".join(
     "مثل `1:1 [1] <النص>`. احذف السابقة `رقم السورة:رقم الآية [رقم الصفحة] ` فقط قبل النسخ؛ "
     "ويظل النص بعد حذفها متضمنًا U+06DD ورقم الآية.\n"
     "- لا يظهر النص على نحو صحيح إلا بخط حفص لمجمع الملك فهد. راجع "
-    "[ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
-    "و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n",
+    "[ترخيص الخط](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
+    "و[إشعار الحقوق](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).\n",
     encoding="utf-8",
 )
 

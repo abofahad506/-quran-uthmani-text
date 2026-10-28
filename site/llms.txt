@@ -25,7 +25,7 @@
 - `search_text` (emlaey spelling) is for matching only. Never copy it as Quranic text.
 - The JSON `text` field includes the end-of-ayah mark U+06DD and the ayah number after it (Arabic-Indic digits in the published text).
 - In `quran.txt`, each ayah line is `surah:ayah [page(s)] <text>`, for example `1:1 [1] <text>`. Strip exactly the `surah:ayah [page(s)] ` prefix before copying; the remaining text includes U+06DD and its ayah number.
-- The text renders correctly only with the KFGQPC Hafs font. See the [font license](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) and [NOTICE](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).
+- The text renders correctly only with the KFGQPC Hafs font. See the [font license](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) and [NOTICE](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).
 
 ## Rendering with the font
 
@@ -59,7 +59,7 @@ The exact font family name from the font name table is `KFGQPC Hafs V3`. Link to
 <div lang="ar" dir="rtl" class="quran">[ضع نص الآية كما ورد في المصدر دون تغيير]</div>
 ```
 
-للاطلاع على الشروط، راجع [ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).
+للاطلاع على الشروط، راجع [ترخيص الخط](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) و[إشعار الحقوق](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).
 
 ## Checksums
 
@@ -74,4 +74,4 @@ Compare with `per_surah` and `overall` in `checksums.json`; the JSON uses zero-p
 - حقل `search_text` (الرسم الإملائي) مخصّص للمطابقة فقط، ولا تنسخه بوصفه نصًا قرآنيًا.
 - يتضمن حقل `text` في JSON علامة نهاية الآية U+06DD ورقم الآية بعدها (بالأرقام العربية الهندية في النص المنشور).
 - كل سطر آية في `quran.txt` بصيغة `رقم السورة:رقم الآية [رقم الصفحة] <النص>`، مثل `1:1 [1] <النص>`. احذف السابقة `رقم السورة:رقم الآية [رقم الصفحة] ` فقط قبل النسخ؛ ويظل النص بعد حذفها متضمنًا U+06DD ورقم الآية.
-- لا يظهر النص على نحو صحيح إلا بخط حفص لمجمع الملك فهد. راجع [ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).
+- لا يظهر النص على نحو صحيح إلا بخط حفص لمجمع الملك فهد. راجع [ترخيص الخط](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) و[إشعار الحقوق](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).
