@@ -23,6 +23,10 @@ def has_text(par):
     return any(l.strip() for l in par["lines"])
 
 
+def is_sura_heading(par):
+    return "".join(par["lines"]).lstrip().startswith("سُورَةُ")
+
+
 def flush_page():
     global page
     if page:
@@ -43,14 +47,14 @@ for p in body.iter(W + "p"):
             elif ch.tag == W + "br":
                 if ch.get(W + "type") == "page":
                     if has_text(par):
+                        par["sura"] = is_sura_heading(par)
                         page.append(par)
                     par = new_par(par["jc"])
                     flush_page()
                 else:
                     par["lines"].append("")
-            elif ch.tag in (W + "drawing", W + "pict"):
-                par["sura"] = True
     if has_text(par):
+        par["sura"] = is_sura_heading(par)
         page.append(par)
 flush_page()
 
