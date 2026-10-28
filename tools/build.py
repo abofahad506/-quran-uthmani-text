@@ -555,6 +555,10 @@ sitemap_urls = "\n".join(
     f"Sitemap: {SITE_URL}/sitemap.xml\n",
     encoding="utf-8",
 )
+allah_example = "".join(
+    chr(codepoint)
+    for codepoint in (0x0671, 0x0644, 0x0644, 0x0651, 0x064E, 0x0647, 0x0650)
+)
 (OUT / "llms.txt").write_text(
     "# القرآن الكريم — رواية حفص بالرسم العثماني\n\n"
     "> نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، "
@@ -572,7 +576,37 @@ sitemap_urls = "\n".join(
     "- الإصدار المرئي هو المرجع، ويُستخدم النص المفهرس كإصدار مصاحب للتصفح والبحث.\n"
     "- JSON ينظم النص بحسب السور والآيات، ويضم مراجع الصفحات والأجزاء وروابط الآيات.\n"
     "- حقوق النص وشروط استخدامه تعود إلى مجمع الملك فهد؛ راجع NOTICE.md في المستودع. "
-    "يرجى التحقق من المصحف الرسمي عند الاستخدامات الحرجة.\n",
+    "يرجى التحقق من المصحف الرسمي عند الاستخدامات الحرجة.\n\n"
+    "## Rules for copying the Quranic text\n\n"
+    "- Copy the `text` field from `quran.json` exactly as published. Never normalize it "
+    "(NFC, NFD, NFKC, or NFKD); never strip, add, or reorder combining marks; and never "
+    "replace or remove U+06DD or the digits after it.\n"
+    f"- Example: in `{allah_example}`, the source order is U+0651 (shadda) then U+064E (fatha). "
+    "NFC reverses that order. Preserve the source order exactly.\n"
+    "- `search_text` (emlaey spelling) is for matching only. Never copy it as Quranic text.\n"
+    "- The JSON `text` field includes the end-of-ayah mark U+06DD and the ayah number "
+    "after it (Arabic-Indic digits in the published text).\n"
+    "- In `quran.txt`, each ayah line is `surah:ayah [page(s)] <text>`, for example "
+    "`1:1 [1] <text>`. Strip exactly the `surah:ayah [page(s)] ` prefix before copying; "
+    "the remaining text includes U+06DD and its ayah number.\n"
+    "- The text renders correctly only with the KFGQPC Hafs font. See the "
+    "[font license](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
+    "and [NOTICE](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n\n"
+    "## قواعد نسخ النص القرآني\n\n"
+    "- انسخ حقل `text` من `quran.json` كما نُشر تمامًا. لا تُطبّق أي تطبيع "
+    "(NFC أو NFD أو NFKC أو NFKD)، ولا تحذف العلامات المركبة أو تضفها أو تغيّر ترتيبها، "
+    "ولا تستبدل علامة نهاية الآية U+06DD أو تحذفها أو تحذف الأرقام التي تليها.\n"
+    f"- مثال: في `{allah_example}` يأتي U+0651 (الشدة) قبل U+064E (الفتحة) في المصدر؛ "
+    "ويعكس NFC هذا الترتيب. حافظ على ترتيب المصدر كما هو تمامًا.\n"
+    "- حقل `search_text` (الرسم الإملائي) مخصّص للمطابقة فقط، ولا تنسخه بوصفه نصًا قرآنيًا.\n"
+    "- يتضمن حقل `text` في JSON علامة نهاية الآية U+06DD ورقم الآية بعدها "
+    "(بالأرقام العربية الهندية في النص المنشور).\n"
+    "- كل سطر آية في `quran.txt` بصيغة `رقم السورة:رقم الآية [رقم الصفحة] <النص>`، "
+    "مثل `1:1 [1] <النص>`. احذف السابقة `رقم السورة:رقم الآية [رقم الصفحة] ` فقط قبل النسخ؛ "
+    "ويظل النص بعد حذفها متضمنًا U+06DD ورقم الآية.\n"
+    "- لا يظهر النص على نحو صحيح إلا بخط حفص لمجمع الملك فهد. راجع "
+    "[ترخيص الخط](https://github.com/abofah506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
+    "و[إشعار الحقوق](https://github.com/abofah506/-quran-uthmani-text/blob/main/NOTICE.md).\n",
     encoding="utf-8",
 )
 

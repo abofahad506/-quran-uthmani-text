@@ -65,6 +65,13 @@ Example JSON shape:
 }
 ```
 
+## Copying the text
+
+- Copy `quran.json`'s `text` field exactly as published. Never normalize it (NFC, NFD, NFKC, NFKD), or strip, add, or reorder combining marks; preserve U+06DD and its following ayah digits. In the example word, source order is U+0651 (shadda) then U+064E (fatha); NFC reverses it.
+- `search_text` is for matching only, never for copying as Quranic text. The JSON `text` field includes U+06DD and the Arabic-Indic ayah number.
+- Each `quran.txt` ayah line is `surah:ayah [page(s)] <text>`; strip exactly the `surah:ayah [page(s)] ` prefix (for example, `1:1 [1] `) before copying.
+- Correct rendering requires the [KFGQPC Hafs font](fonts/KFGQPC-Hafs-V30.ttf); see its [license](fonts/LICENSE-KFGQPC.txt) and [`NOTICE.md`](NOTICE.md).
+
 The plain-text file uses one ayah per line in the format
 `surah:ayah [printed page(s)] <source text>`. The Quranic text is from the
 **King Fahd Glorious Quran Printing Complex**; its rights and terms are not
