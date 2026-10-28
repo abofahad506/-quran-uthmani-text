@@ -17,6 +17,10 @@ jobs:
           mkdir -p site/fonts
           cp fonts/KFGQPC-Hafs-V30.ttf fonts/LICENSE-KFGQPC.txt site/fonts/
           python tools/build.py
+      - name: Install integrity verification dependency
+        run: python -m pip install fonttools
+      - name: Verify generated Quran text
+        run: python tools/verify.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
