@@ -1,0 +1,37 @@
+name: links
+on:
+  pull_request:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build generated HTML for link checking
+        run: |
+          mkdir -p site/fonts
+          cp fonts/KFGQPC-Hafs-V30.ttf fonts/LICENSE-KFGQPC.txt site/fonts/
+          python tools/build.py
+      # New Pages URLs are generated here but go live only after merge; the weekly run checks them live.
+      - name: Check links in pull requests
+        if: github.event_name == 'pull_request'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --verbose --no-progress
+            --exclude '^https://abofahad506.github.io/-quran-uthmani-text/(data/index\.json|data/surahs/.*|surah/.*|CHECKSUMS\.sha256)$'
+            README.md NOTICE.md 'site/**/*.html'
+          fail: true
+      - name: Check links in scheduled runs
+        if: github.event_name != 'pull_request'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --verbose --no-progress README.md NOTICE.md 'site/**/*.html'
+          fail: true

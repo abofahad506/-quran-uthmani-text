@@ -9,3 +9,5 @@ site/fonts/
 site/data/
 site/llms-full.txt
 site/checksums.json
+site/CHECKSUMS.sha256
+site/surah/
