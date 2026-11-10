@@ -349,7 +349,8 @@ def main():
     html_rows = [
         (int(surah), int(ayah), unescape(text))
         for surah, ayah, text in re.findall(
-            r'<p id="s(\d+)-a(\d+)">.*?<span class="ayah">(.*?)</span>',
+            r'<p id="s(\d+)-a(\d+)"[^>]*>.*?'
+            r'<span class="ayah"[^>]*>(.*?)</span>',
             html_content,
             re.DOTALL,
         )

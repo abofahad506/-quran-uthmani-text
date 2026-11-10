@@ -2,11 +2,15 @@
 
 The visual mushaf edition is the reference edition. The linked text edition is a companion for browsing and search, using King Fahd Complex (KFGQPC) Hafs v3.0 text data.
 
-[Open the Mushaf viewer](https://abofahad506.github.io/-quran-uthmani-text/) ·
-[Browse linked surahs and ayahs](https://abofahad506.github.io/-quran-uthmani-text/quran.html) ·
-[Download JSON](https://abofahad506.github.io/-quran-uthmani-text/quran.json) ·
-[Download search index](https://abofahad506.github.io/-quran-uthmani-text/quran-search.json) ·
-[Download plain text](https://abofahad506.github.io/-quran-uthmani-text/quran.txt)
+## Quick links
+
+- Live mushaf: [open the GitHub Pages site](https://abofahad506.github.io/-quran-uthmani-text/)
+- Text edition: [browse linked surahs and ayahs](https://abofahad506.github.io/-quran-uthmani-text/quran.html)
+- Per-surah JSON index: [data/index.json](https://abofahad506.github.io/-quran-uthmani-text/data/index.json)
+- Plain-text download: [quran.txt](https://abofahad506.github.io/-quran-uthmani-text/quran.txt)
+- Source and provenance: [`NOTICE.md`](NOTICE.md)
+- License and rights: [repository code and third-party material](#license-and-rights)
+- Checksums: [`CHECKSUMS.sha256`](CHECKSUMS.sha256)
 
 ## Companion text edition
 
@@ -35,7 +39,120 @@ spellings can find their Uthmani-rendered ayahs. Search normalization is applied
 only to matching, never to the source text shown or copied. The same relative
 URLs are included in the JSON `url` fields.
 
-Example JSON shape:
+## Repository layout
+
+- `src/kfgqpc_hafs_v30.json`: source Uthmani and emlaey ayah records from KFGQPC.
+- `src/Mushaf-Hafs-Uthmanic.docx`: source visual mushaf layout.
+- `tools/build.py`: builds the visual mushaf, linked text edition, and legacy downloads.
+- `tools/build_surahs.py`: builds the agent-friendly per-surah JSON and HTML pages.
+- `tools/verify.py` and `tools/verify_build.py`: verify source fidelity, generated data, and reproducibility.
+- `site/`: GitHub Pages assets; full page and data outputs are generated during the build.
+- `fonts/`: original KFGQPC font and its license.
+- `NOTICE.md` and `LICENSE`: third-party rights notice and repository code license.
+
+## Data format
+
+The per-surah index is a JSON array with one record per surah. Its `file` path is
+relative to `data/index.json`. Each file contains a `surah` number, Arabic name,
+and ordered `ayahs`; each ayah has its number, `surah:ayah` key, and verbatim
+source text.
+
+The first index record is:
+
+```json
+{
+  "surah": 1,
+  "name_ar": "الفَاتِحَةِ",
+  "ayah_count": 7,
+  "file": "surahs/001.json"
+}
+```
+
+The following ayah records are copied from `data/surahs/001.json`:
+
+```json
+[
+  {
+    "ayah": 1,
+    "key": "1:1",
+    "text": "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ ۝١"
+  },
+  {
+    "ayah": 7,
+    "key": "1:7",
+    "text": "صِرَٰطَ ٱلَّذِينَ أَنۡعَمۡتَ عَلَيۡهِمۡ غَيۡرِ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وَلَا ٱلضَّآلِّينَ ۝٧"
+  }
+]
+```
+
+For compatibility, the existing [`quran.json`](https://abofahad506.github.io/-quran-uthmani-text/quran.json)
+and `data/surah/NNN.json` endpoints remain available. The new
+`data/surahs/NNN.json` files use the smaller schema above and include no
+search-normalized text.
+
+## Usage examples
+
+Fetch one surah and select ayah 7 in JavaScript:
+
+```js
+const base = "https://abofahad506.github.io/-quran-uthmani-text/";
+const index = await fetch(new URL("data/index.json", base))
+  .then(response => response.json());
+const surah = index.find(item => item.surah === 1);
+const data = await fetch(new URL(
+  surah.file,
+  new URL("data/", base)
+)).then(response => response.json());
+const ayah = data.ayahs.find(item => item.key === "1:7");
+console.log(ayah.text);
+```
+
+The same lookup in Python:
+
+```python
+import json
+from urllib.request import urlopen
+
+base = "https://abofahad506.github.io/-quran-uthmani-text/"
+with urlopen(base + "data/index.json") as response:
+    index = json.load(response)
+surah = next(item for item in index if item["surah"] == 1)
+with urlopen(base + "data/" + surah["file"]) as response:
+    data = json.load(response)
+ayah = next(item for item in data["ayahs"] if item["key"] == "1:7")
+print(ayah["text"])
+```
+
+## Rebuilding the data
+
+With Python 3.12 and the repository dependencies available, run the same
+generation and checks used by GitHub Actions:
+
+```sh
+mkdir -p site/fonts
+cp fonts/KFGQPC-Hafs-V30.ttf fonts/LICENSE-KFGQPC.txt site/fonts/
+python tools/build.py
+python tools/verify_build.py
+python -m pip install fonttools
+python tools/verify.py
+python tools/test_verify.py
+```
+
+`tools/build.py` regenerates the visual and linked editions, per-surah JSON,
+plain-text and HTML files, discovery files, and `CHECKSUMS.sha256`. The generated
+site is published by the Pages workflow; do not edit its output by hand.
+`python tools/build_surahs.py` regenerates only the agent-friendly per-surah JSON
+and HTML; run the full build afterward to refresh the site indexes and checksums.
+
+## Versioning
+
+Current source text version: **KFGQPC Hafs v3.0**. Generated surah files are
+derived from `src/kfgqpc_hafs_v30.json`; the visual mushaf remains the reference.
+
+### Existing complete JSON shape
+
+The legacy [`quran.json`](https://abofahad506.github.io/-quran-uthmani-text/quran.json)
+keeps its existing extended schema:
 
 ```json
 {
@@ -123,5 +240,12 @@ The Quranic text provided in this repository is in Uthmani script and sourced fr
 
 ---
 
-* [King Fahd Complex for the Printing of the Holy Quran]
-* https://fonts.qurancomplex.gov.sa/ten-readings
+## License and rights
+
+**Proposed clarification — needs-owner-review:** the MIT license in `LICENSE`
+covers repository code and tooling only. The Quran text and KFGQPC font are
+subject to KFGQPC rights and terms, are not covered by MIT, and are described in
+[`NOTICE.md`](NOTICE.md) and [`fonts/LICENSE-KFGQPC.txt`](fonts/LICENSE-KFGQPC.txt).
+
+The official [King Fahd Glorious Quran Printing Complex website](https://qurancomplex.gov.sa/)
+provides further source information.

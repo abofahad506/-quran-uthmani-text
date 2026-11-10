@@ -81,7 +81,7 @@ class VerifyMutationTests(unittest.TestCase):
         html_path = self.root / "site" / "quran.html"
         original = html_path.read_text(encoding="utf-8")
         match = re.search(
-            r'(<p id="s1-a1">.*?<span class="ayah">)(.*?)(</span>)',
+            r'(<p id="s1-a1"[^>]*>.*?<span class="ayah"[^>]*>)(.*?)(</span>)',
             original,
             re.DOTALL,
         )

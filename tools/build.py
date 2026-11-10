@@ -4,12 +4,19 @@ one <div> per printed line. Text is copied verbatim; nothing is rewritten."""
 import re, sys, zipfile, hashlib, json, pathlib
 from xml.etree import ElementTree as ET
 from html import escape, unescape
+from build_surahs import build_surah_outputs
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 SRC = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "src/Mushaf-Hafs-Uthmanic.docx")
 OUT = pathlib.Path("site")
 KFGQPC_DATA = pathlib.Path(__file__).parent.parent.joinpath("src", "kfgqpc_hafs_v30.json")
 SITE_URL = "https://abofahad506.github.io/-quran-uthmani-text"
+
+
+def write_text(path, text):
+    with pathlib.Path(path).open("w", encoding="utf-8", newline="\n") as output:
+        output.write(text)
+
 
 root = ET.fromstring(zipfile.ZipFile(SRC).read("word/document.xml"))
 body = root.find(W + "body")
@@ -177,8 +184,8 @@ for n, pg in enumerate(pages, 1):
 
 tpl = (pathlib.Path(__file__).parent / "template.html").read_text(encoding="utf-8")
 OUT.mkdir(exist_ok=True)
-(OUT / "index.html").write_text(tpl.replace("{{PAGES}}", "\n".join(html_pages)), encoding="utf-8")
-(OUT / "page-hashes.json").write_text(json.dumps(hashes), encoding="utf-8")
+write_text(OUT / "index.html", tpl.replace("{{PAGES}}", "\n".join(html_pages)))
+write_text(OUT / "page-hashes.json", json.dumps(hashes))
 
 surahs = extract_quran()
 records = json.loads(KFGQPC_DATA.read_text(encoding="utf-8"))
@@ -246,9 +253,21 @@ for surah in surahs:
     surah["url"] = f"quran.html#s{surah['number']}"
     for ayah in surah["ayahs"]:
         ayah["url"] = f"quran.html#s{surah['number']}-a{ayah['number']}"
-(OUT / "quran.json").write_text(
-    json.dumps(quran, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-)
+quran_json_ld = json.dumps({
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "القرآن الكريم — رواية حفص بالرسم العثماني",
+    "inLanguage": "ar",
+    "publisher": {
+        "@type": "Organization",
+        "name": "King Fahd Glorious Quran Printing Complex (KFGQPC)",
+    },
+    "license": (
+        "Quranic text rights belong to KFGQPC; see repository NOTICE.md. "
+        "The text is not covered by the repository's MIT license."
+    ),
+}, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+write_text(OUT / "quran.json", json.dumps(quran, ensure_ascii=False, indent=2) + "\n")
 
 search_index = {
     "attribution": "King Fahd Glorious Quran Printing Complex (KFGQPC), Hafs v3.0",
@@ -263,9 +282,9 @@ search_index = {
         for ayah in surah["ayahs"]
     ],
 }
-(OUT / "quran-search.json").write_text(
+write_text(
+    OUT / "quran-search.json",
     json.dumps(search_index, ensure_ascii=False, separators=(",", ":")) + "\n",
-    encoding="utf-8",
 )
 
 plain_text = [
@@ -284,7 +303,7 @@ for surah in surahs:
             f"{surah['number']}:{ayah['number']} [{page_list}] {ayah['text']}"
         )
     plain_text.append("")
-(OUT / "quran.txt").write_text("\n".join(plain_text), encoding="utf-8")
+write_text(OUT / "quran.txt", "\n".join(plain_text))
 
 checksum_surahs = {
     f'{surah["number"]:03}': hashlib.sha256(
@@ -295,13 +314,13 @@ checksum_surahs = {
 checksum_text = "\n".join(
     ayah["text"] for surah in surahs for ayah in surah["ayahs"]
 )
-(OUT / "checksums.json").write_text(
+write_text(
+    OUT / "checksums.json",
     json.dumps({
         "algorithm": "SHA-256",
         "per_surah": checksum_surahs,
         "overall": hashlib.sha256(checksum_text.encode("utf-8")).hexdigest(),
     }, ensure_ascii=False, indent=2) + "\n",
-    encoding="utf-8",
 )
 
 surah_data_dir = OUT / "data" / "surah"
@@ -320,15 +339,12 @@ for surah in surahs:
         "ayah_count": len(surah["ayahs"]),
         "ayahs": surah["ayahs"],
     }
-    surah_json_path.write_text(
-        json.dumps(surah_json, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_text(surah_json_path, json.dumps(surah_json, ensure_ascii=False, indent=2) + "\n")
     surah_text = "\n".join(
         f'{number}:{ayah["number"]} [{",".join(map(str, ayah["pages"]))}] {ayah["text"]}'
         for ayah in surah["ayahs"]
     )
-    surah_text_path.write_text(surah_text + "\n", encoding="utf-8")
+    write_text(surah_text_path, surah_text + "\n")
 
     generated_surah = json.loads(surah_json_path.read_text(encoding="utf-8"))
     if generated_surah != surah_json:
@@ -368,6 +384,9 @@ quran_html = [
     '<meta property="og:description" content="نص مفهرس للتصفح والبحث وفق بيانات مجمع الملك فهد؛ إصدار المصحف المرئي هو المرجع.">',
     f'<meta property="og:url" content="{SITE_URL}/quran.html">',
     '<title>النص المصاحب للقرآن الكريم — حفص، الرسم العثماني، KFGQPC v3.0</title>',
+    '<script type="application/ld+json">',
+    quran_json_ld,
+    '</script>',
     '<style>',
     'body{max-width:52rem;margin:2rem auto;padding:0 1rem;color:#222;font-family:serif;line-height:1.9}',
     'h1,h2{line-height:1.4}h2{margin-top:2rem;padding-top:1rem;border-top:1px solid #ccc}',
@@ -386,7 +405,9 @@ quran_html = [
     '<p class="edition-note" role="note">هذه نسخة نصية مصاحبة للتصفح والبحث، مصدرها بيانات مجمع الملك فهد (حفص، الإصدار 3.0). إصدار المصحف المرئي هو المرجع؛ <a href="index.html">افتح صفحات المصحف</a>.</p>',
     f'<p>{escape(attribution)}</p>',
     '<p><a href="index.html">عرض صفحات المصحف بالرسم العثماني</a> · '
-    '<a href="quran.json">تنزيل JSON</a> · <a href="quran.txt">تنزيل النص</a></p>',
+    '<a href="quran.json">تنزيل JSON</a> · <a href="quran.txt">تنزيل النص</a> · '
+    '<a href="data/index.json">فهرس JSON للسور</a></p>',
+    '<p><a href="surah/001.html">صفحات السور المنفصلة</a></p>',
     '<section class="tools" aria-label="البحث والنسخ">',
     '<form id="search-form" role="search">',
     '<label for="search-query">ابحث في نص الآيات:</label> ',
@@ -408,6 +429,7 @@ quran_html = [
 for surah in surahs:
     quran_html.append(
         f'<li><a href="#s{surah["number"]}">{escape(surah["name"])}</a></li>'
+        f' · <a href="surah/{surah["number"]:03}.html">صفحة مستقلة</a>'
     )
 quran_html.extend(['</ol></nav>', '</header>', '<main>'])
 for surah in surahs:
@@ -423,10 +445,13 @@ for surah in surahs:
         )
         reference = f'{surah["number"]}:{ayah["number"]}'
         quran_html.append(
-            f'<p id="s{surah["number"]}-a{ayah["number"]}">'
+            f'<p id="s{surah["number"]}-a{ayah["number"]}" '
+            f'data-surah="{surah["number"]}" data-ayah="{ayah["number"]}">'
             f'<a class="reference" href="#s{surah["number"]}-a{ayah["number"]}">'
             f'{reference}</a> '
-            f'<span class="ayah">{escape(ayah["text"])}</span> '
+            f'<span class="ayah" id="ayah-{surah["number"]}-{ayah["number"]}" '
+            f'data-surah="{surah["number"]}" data-ayah="{ayah["number"]}">'
+            f'{escape(ayah["text"])}</span> '
             f'<span class="page-link">[صفحة {page_links}]</span> '
             f'<button class="copy-ayah" type="button" '
             f'data-copy-ayah="{surah["number"]}:{ayah["number"]}" '
@@ -553,7 +578,8 @@ quran_html.extend([
     '</html>',
     '',
 ])
-(OUT / "quran.html").write_text("\n".join(quran_html), encoding="utf-8")
+write_text(OUT / "quran.html", "\n".join(quran_html))
+build_surah_outputs(records, OUT)
 
 generated_quran = json.loads((OUT / "quran.json").read_text(encoding="utf-8"))
 generated_ayahs = [
@@ -592,7 +618,7 @@ if generated_text_rows != [
 generated_html_ayahs = [
     unescape(text)
     for text in re.findall(
-        r'<span class="ayah">(.*?)</span>',
+        r'<span class="ayah"[^>]*>(.*?)</span>',
         (OUT / "quran.html").read_text(encoding="utf-8"),
     )
 ]
@@ -627,7 +653,7 @@ example_html = "\n".join([
     "</html>",
     "",
 ])
-(OUT / "example.html").write_text(example_html, encoding="utf-8")
+write_text(OUT / "example.html", example_html)
 if [
     unescape(text)
     for text in re.findall(r'<p class="ayah" lang="ar" dir="rtl">(.*?)</p>', example_html)
@@ -683,11 +709,12 @@ llms_full_lines.extend([
     f"[البقرة ٢٥٥]({SITE_URL}/quran.html#s2-a255). ونمط رابط السورة: `quran.html#s{{surah}}`.",
     "",
 ])
-(OUT / "llms-full.txt").write_text("\n".join(llms_full_lines), encoding="utf-8")
+write_text(OUT / "llms-full.txt", "\n".join(llms_full_lines))
 
 site_pages = [
     f"{SITE_URL}/",
     f"{SITE_URL}/quran.html",
+    f"{SITE_URL}/data/index.json",
     f"{SITE_URL}/example.html",
     f"{SITE_URL}/llms-full.txt",
 ]
@@ -696,27 +723,36 @@ site_pages.extend(
     for surah in surahs
     for extension in (".json", ".txt")
 )
+site_pages.extend(
+    f"{SITE_URL}/data/surahs/{surah['number']:03}.json"
+    for surah in surahs
+)
+site_pages.extend(
+    f"{SITE_URL}/surah/{surah['number']:03}.html"
+    for surah in surahs
+)
 sitemap_urls = "\n".join(
     f"  <url><loc>{url}</loc></url>" for url in site_pages
 )
-(OUT / "sitemap.xml").write_text(
+write_text(
+    OUT / "sitemap.xml",
     '<?xml version="1.0" encoding="UTF-8"?>\n'
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     f"{sitemap_urls}\n"
     "</urlset>\n",
-    encoding="utf-8",
 )
-(OUT / "robots.txt").write_text(
+write_text(
+    OUT / "robots.txt",
     "User-agent: *\n"
     "Allow: /\n"
     f"Sitemap: {SITE_URL}/sitemap.xml\n",
-    encoding="utf-8",
 )
 allah_example = "".join(
     chr(codepoint)
     for codepoint in (0x0671, 0x0644, 0x0644, 0x0651, 0x064E, 0x0647, 0x0650)
 )
-(OUT / "llms.txt").write_text(
+write_text(
+    OUT / "llms.txt",
     "# القرآن الكريم — رواية حفص بالرسم العثماني\n\n"
     "> نص القرآن بالرسم العثماني وفق بيانات مجمع الملك فهد لطباعة المصحف الشريف، "
     "مع إصدار مرئي مطابق للمصحف. الإصدار المرئي هو المرجع، والنص أدناه إصدار مصاحب "
@@ -724,9 +760,13 @@ allah_example = "".join(
     "## Site editions\n\n"
     f"- Visual mushaf edition (reference): {SITE_URL}/\n"
     f"- Text edition, indexed by surah and ayah: {SITE_URL}/quran.html\n"
+    f"- Per-surah HTML pages: {SITE_URL}/surah/NNN.html (NNN is zero-padded, 001–114).\n"
+    f"- Per-surah JSON index: {SITE_URL}/data/index.json\n"
+    f"- Agent-friendly per-surah JSON: {SITE_URL}/data/surahs/NNN.json\n"
     f"- Full surah index: {SITE_URL}/llms-full.txt\n"
     f"- Search index: {SITE_URL}/quran-search.json\n"
     f"- Text checksums: {SITE_URL}/checksums.json\n"
+    f"- SHA-256 file manifest: {SITE_URL}/CHECKSUMS.sha256\n"
     f"- Per-surah JSON pattern: `{SITE_URL}/data/surah/NNN.json`; per-surah TXT pattern: "
     f"`{SITE_URL}/data/surah/NNN.txt` (NNN is zero-padded, 001–114). "
     f"Examples: [001.json]({SITE_URL}/data/surah/001.json), "
@@ -740,9 +780,13 @@ allah_example = "".join(
     "## إصدارات الموقع\n\n"
     f"- المصحف المرئي (المرجع): {SITE_URL}/\n"
     f"- النص المفهرس حسب السور والآيات: {SITE_URL}/quran.html\n"
+    f"- صفحات HTML منفصلة للسور: {SITE_URL}/surah/NNN.html (ثلاث خانات من 001 إلى 114).\n"
+    f"- فهرس JSON للسور: {SITE_URL}/data/index.json\n"
+    f"- ملفات JSON للسور: {SITE_URL}/data/surahs/NNN.json\n"
     f"- الفهرس الكامل للسور: {SITE_URL}/llms-full.txt\n"
     f"- فهرس البحث: {SITE_URL}/quran-search.json\n"
     f"- بصمات النصوص للتحقق: {SITE_URL}/checksums.json\n"
+    f"- ملف بصمات SHA-256: {SITE_URL}/CHECKSUMS.sha256\n"
     f"- نمط ملفات JSON لكل سورة: `{SITE_URL}/data/surah/NNN.json`؛ ونمط TXT: "
     f"`{SITE_URL}/data/surah/NNN.txt` (يُكتب NNN بثلاث خانات من 001 إلى 114). "
     f"أمثلة: [001.json]({SITE_URL}/data/surah/001.json)، "
@@ -826,8 +870,31 @@ allah_example = "".join(
     "- لا يظهر النص على نحو صحيح إلا بخط حفص لمجمع الملك فهد. راجع "
     "[ترخيص الخط](https://github.com/abofahad506/-quran-uthmani-text/blob/main/fonts/LICENSE-KFGQPC.txt) "
     "و[إشعار الحقوق](https://github.com/abofahad506/-quran-uthmani-text/blob/main/NOTICE.md).\n",
-    encoding="utf-8",
 )
+
+project_root = pathlib.Path(__file__).resolve().parents[1]
+manifest_paths = [
+    KFGQPC_DATA.resolve(),
+    (project_root / "fonts" / "KFGQPC-Hafs-V30.ttf").resolve(),
+]
+for path in OUT.rglob("*"):
+    if not path.is_file():
+        continue
+    relative = path.relative_to(OUT)
+    if relative.parts[0] == "data" or relative.as_posix() in {
+        "quran.json",
+        "quran-search.json",
+        "quran.txt",
+    }:
+        manifest_paths.append(path.resolve())
+manifest_lines = [
+    f"{hashlib.sha256(path.read_bytes()).hexdigest()}  "
+    f"{path.relative_to(project_root).as_posix()}"
+    for path in sorted(manifest_paths, key=lambda item: item.relative_to(project_root).as_posix())
+]
+manifest = "\n".join(manifest_lines) + "\n"
+write_text(project_root / "CHECKSUMS.sha256", manifest)
+write_text(OUT / "CHECKSUMS.sha256", manifest)
 
 print(
     f"{len(pages)} pages, {sum(len(p) for p in pages)} paragraphs, "

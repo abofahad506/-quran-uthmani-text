@@ -1,0 +1,30 @@
+name: verify
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare site assets
+        run: |
+          mkdir -p site/fonts
+          cp fonts/KFGQPC-Hafs-V30.ttf fonts/LICENSE-KFGQPC.txt site/fonts/
+      - name: Build generated files
+        run: python tools/build.py
+      - name: Install integrity verification dependency
+        run: python -m pip install fonttools
+      - name: Verify source text and font
+        run: python tools/verify.py
+      - name: Verify per-surah data and reproducibility
+        run: python tools/verify_build.py
+      - name: Test integrity verifier mutations
+        run: python tools/test_verify.py
+      - name: Require committed generated-file checksums to be current
+        run: git diff --exit-code -- CHECKSUMS.sha256 site/llms.txt site/robots.txt site/sitemap.xml
