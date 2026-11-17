@@ -47,7 +47,7 @@ URLs are included in the JSON `url` fields.
 - `tools/build_surahs.py`: builds the agent-friendly per-surah JSON and HTML pages.
 - `tools/verify.py` and `tools/verify_build.py`: verify source fidelity, generated data, and reproducibility.
 - `site/`: GitHub Pages assets; full page and data outputs are generated during the build.
-- `fonts/`: original KFGQPC font and its license.
+- `fonts/`: KFGQPC Uthmanic and Amiri Arabic fonts with their licenses.
 - `NOTICE.md` and `LICENSE`: third-party rights notice and repository code license.
 
 ## Data format
@@ -201,6 +201,8 @@ Verify against the official printed mushaf for critical use.
 The embedded font family name is `KFGQPC Hafs V3`. Link to or download the original,
 unmodified font file; do not convert or subset it. Its license forbids modification.
 See [`fonts/LICENSE-KFGQPC.txt`](fonts/LICENSE-KFGQPC.txt) and [`NOTICE.md`](NOTICE.md).
+`Amiri-Regular.ttf` is also included as a Naskh-style Arabic font under the SIL Open
+Font License; it is not a replacement for the KFGQPC Uthmanic font.
 The [one-ayah demo](https://abofahad506.github.io/-quran-uthmani-text/example.html)
 uses the KFGQPC font from its absolute URL.
 
