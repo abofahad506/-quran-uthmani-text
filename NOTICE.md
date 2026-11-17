@@ -21,8 +21,8 @@ The font is served byte-for-byte as received (no conversion, no subsetting).
 ## Amiri font terms
 The Amiri font is redistributed unmodified under the SIL Open Font License 1.1.
 See `fonts/OFL-Amiri.txt` for the full license text. The font metadata identifies
-the copyright holder as The Amiri Project Authors and links to
-https://github.com/aliftype/amiri.
+the copyright holder as The Amiri Project Authors. Source: [Amiri on Google
+Fonts](https://fonts.google.com/specimen/Amiri).
 
 ## Rules for this repository
 1. Never edit the text of the Quran, only its layout.
